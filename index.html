@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<meta name="apple-mobile-web-app-title" content="NutriFlow"/>
+<meta name="apple-mobile-web-app-title" content="Kalzo"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#16a34a"/>
 <link rel="manifest" href="/manifest.json"/>
-<title>NutriFlow — Coach Nutrition IA</title>
+<title>Kalzo — Coach Nutrition IA</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
@@ -159,10 +159,24 @@
   <div style="width:100%;max-width:400px;">
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px;">
-      <div style="width:56px;height:56px;background:var(--accent-green);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
-        <span style="font-size:28px;">🥗</span>
+      <div style="margin:0 auto 12px; display:flex; justify-content:center;">
+        <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="kg-auth" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#16a34a"/>
+              <stop offset="100%" stop-color="#4ade80"/>
+            </linearGradient>
+          </defs>
+          <rect width="72" height="72" rx="18" fill="#f0fdf4"/>
+          <!-- Barre verticale -->
+          <rect x="20" y="14" width="10" height="44" rx="3" fill="url(#kg-auth)"/>
+          <!-- Bras supérieur -->
+          <polygon points="30,14 30,28 54,14 44,14" fill="url(#kg-auth)"/>
+          <!-- Bras inférieur -->
+          <polygon points="30,30 30,44 44,58 54,58 30,30" fill="url(#kg-auth)"/>
+        </svg>
       </div>
-      <div class="font-display" style="font-size:28px;font-weight:800;color:var(--text-primary);">NutriFlow</div>
+      <div class="font-display" style="font-size:28px;font-weight:800;color:var(--text-primary);">Kalzo</div>
       <div style="color:var(--text-muted);font-size:14px;margin-top:4px;">Votre coach nutrition IA</div>
     </div>
 
@@ -224,7 +238,15 @@
 
 <!-- Mobile Header -->
 <div class="md:hidden flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border); background:var(--bg-card); box-shadow:var(--shadow);">
-  <span class="font-display text-lg font-bold" style="color:var(--accent-green);">NutriFlow</span>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <svg width="24" height="24" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="kg-mob" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#16a34a"/><stop offset="100%" stop-color="#4ade80"/></linearGradient></defs>
+      <rect x="20" y="14" width="10" height="44" rx="3" fill="url(#kg-mob)"/>
+      <polygon points="30,14 30,28 54,14 44,14" fill="url(#kg-mob)"/>
+      <polygon points="30,30 30,44 44,58 54,58 30,30" fill="url(#kg-mob)"/>
+    </svg>
+    <span class="font-display text-lg font-bold" style="color:var(--accent-green);">Kalzo</span>
+  </div>
   <button onclick="toggleMobileMenu()" class="p-2 rounded-lg" style="background:#f3f4f6;">
     <svg width="20" height="20" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
   </button>
@@ -237,11 +259,16 @@
     <!-- Logo -->
     <div class="p-5 border-b" style="border-color:var(--border);">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:var(--accent-green);">
-          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#080c10" stroke-width="2.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:#f0fdf4;">
+          <svg width="28" height="28" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="kg-sb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#16a34a"/><stop offset="100%" stop-color="#4ade80"/></linearGradient></defs>
+            <rect x="20" y="14" width="10" height="44" rx="3" fill="url(#kg-sb)"/>
+            <polygon points="30,14 30,28 54,14 44,14" fill="url(#kg-sb)"/>
+            <polygon points="30,30 30,44 44,58 54,58 30,30" fill="url(#kg-sb)"/>
+          </svg>
         </div>
         <div>
-          <div class="font-display font-bold text-base" style="color:var(--text-primary);">NutriFlow</div>
+          <div class="font-display font-bold text-base" style="color:var(--text-primary);">Kalzo</div>
           <div class="text-xs" style="color:var(--text-muted);">by IA</div>
         </div>
       </div>
@@ -344,7 +371,7 @@
       <!-- ═══════════════════════════════════════ -->
       <div id="page-dashboard" class="tab-content active">
         <div class="mb-6">
-          <h1 class="font-display text-3xl font-bold mb-1">Tableau de bord <span style="color:var(--accent-green);">NutriFlow</span></h1>
+          <h1 class="font-display text-3xl font-bold mb-1">Tableau de bord <span style="color:var(--accent-green);">Kalzo</span></h1>
           <p style="color:var(--text-muted); font-size:14px;" id="dash-date"></p>
         </div>
 
@@ -760,7 +787,7 @@
               <div>
                 <label class="block text-xs font-semibold mb-1" style="color:var(--text-muted);">Mon objectif du jour</label>
                 <select id="resto-goal">
-                  <option value="auto">Selon mon profil NutriFlow</option>
+                  <option value="auto">Selon mon profil Kalzo</option>
                   <option value="seche">Je suis en sèche (low cal, high protein)</option>
                   <option value="masse">Prise de masse (calorique et protéiné)</option>
                   <option value="maintenance">Maintenance équilibrée</option>
@@ -2184,7 +2211,7 @@ function buildPrintZones(plan, ingredients) {
       <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid #00c48c; padding-bottom:12px; margin-bottom:24px;">
         <div>
           <h1 style="font-size:26px; font-weight:900; color:#00c48c; margin:0;">🛒 Liste de courses</h1>
-          <div style="font-size:13px; color:#666; margin-top:4px;">NutriFlow AI · Plan de la semaine · ${today}</div>
+          <div style="font-size:13px; color:#666; margin-top:4px;">Kalzo AI · Plan de la semaine · ${today}</div>
         </div>
         <div style="font-size:13px; color:#888;">${ingredients.length} articles</div>
       </div>
@@ -2211,7 +2238,7 @@ function buildPrintZones(plan, ingredients) {
     <div style="font-family:Arial,sans-serif; color:#111;">
       <div style="text-align:center; border-bottom:3px solid #00c48c; padding-bottom:12px; margin-bottom:20px;">
         <h1 style="font-size:22px; font-weight:900; color:#00c48c; margin:0;">📅 Mon Plan Nutrition — Semaine complète</h1>
-        <div style="font-size:12px; color:#666; margin-top:4px;">NutriFlow AI · ${today}</div>
+        <div style="font-size:12px; color:#666; margin-top:4px;">Kalzo AI · ${today}</div>
       </div>
       <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px;">
         ${plan.map(d=>`
@@ -2229,7 +2256,7 @@ function buildPrintZones(plan, ingredients) {
           </div>`).join('')}
       </div>
       <div style="margin-top:20px; text-align:center; font-size:11px; color:#aaa;">
-        Généré par NutriFlow AI · Algorithme anti-lassitude 4 jours · nutriflow.ai
+        Généré par Kalzo AI · Algorithme anti-lassitude 4 jours · kalzo.app
       </div>
     </div>`;
 }
@@ -2254,7 +2281,7 @@ function printShoppingList() {
   const half = Math.ceil(checkedItems.length / 2);
 
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
-  <title>Liste de courses — NutriFlow</title>
+  <title>Liste de courses — Kalzo</title>
   <style>
     body { font-family: Arial, sans-serif; color: #111; padding: 32px; max-width: 800px; margin: 0 auto; }
     h1 { font-size: 26px; font-weight: 900; color: #00c48c; margin: 0; }
@@ -2270,7 +2297,7 @@ function printShoppingList() {
   <div class="header">
     <div>
       <h1>🛒 Liste de courses</h1>
-      <div class="subtitle">NutriFlow AI · ${today}</div>
+      <div class="subtitle">Kalzo AI · ${today}</div>
     </div>
     <div class="count">${checkedItems.length} article${checkedItems.length > 1 ? 's' : ''}</div>
   </div>
@@ -2296,7 +2323,7 @@ function printWeekPlan() {
   const plan = appState.currentPlan;
 
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
-  <title>Plan semaine — NutriFlow</title>
+  <title>Plan semaine — Kalzo</title>
   <style>
     body { font-family: Arial, sans-serif; color: #111; padding: 16px; }
     h1 { font-size: 20px; font-weight: 900; color: #00c48c; margin: 0; text-align: center; }
@@ -2315,7 +2342,7 @@ function printWeekPlan() {
   </head><body>
   <div class="header">
     <h1>📅 Mon Plan Nutrition — Semaine</h1>
-    <div class="subtitle">NutriFlow AI · ${today}</div>
+    <div class="subtitle">Kalzo AI · ${today}</div>
   </div>
   <div class="grid">
     ${plan.map(d => `
@@ -2330,7 +2357,7 @@ function printWeekPlan() {
         <div class="day-total">Total : ${d.meals.reduce((s,m) => s + m.recipe.macros.kcal, 0)} kcal</div>
       </div>`).join('')}
   </div>
-  <div class="footer">Généré par NutriFlow AI · Algorithme anti-lassitude 4 jours</div>
+  <div class="footer">Généré par Kalzo AI · Algorithme anti-lassitude 4 jours</div>
   <script>window.onload = function(){ window.print(); window.onafterprint = function(){ window.close(); }; }<\/script>
   </body></html>`;
 
