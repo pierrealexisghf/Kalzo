@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     const { priceId, userId, userEmail, credits } = req.body;
     const siteUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : 'https://nutriflowbyia.vercel.app';
+      : 'https://kalzo.vercel.app';
 
     const params = new URLSearchParams({
       'payment_method_types[]': 'card',
