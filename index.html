@@ -314,11 +314,8 @@
     <div class="p-4 border-t" style="border-color:var(--border);">
       <!-- Credits display -->
       <div id="sidebar-credits" style="background:var(--accent-green-light);border:1px solid #bbf7d0;border-radius:10px;padding:10px 12px;margin-bottom:10px;display:none;">
-        <div style="font-size:10px;color:var(--accent-green);font-weight:700;margin-bottom:3px;letter-spacing:0.05em;">MON ABONNEMENT</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div id="credits-display" style="font-size:20px;font-weight:700;color:var(--accent-green);">—</div>
-          <div style="font-size:11px;color:var(--text-muted);">Crédits disponibles</div>
-        </div>
+        <div id="sidebar-plan-label" style="font-size:10px;color:var(--accent-green);font-weight:700;margin-bottom:3px;letter-spacing:0.05em;">MON ABONNEMENT</div>
+        <div id="sidebar-plan-detail" style="font-size:13px;font-weight:600;color:var(--accent-green);">—</div>
       </div>
       <!-- User + logout -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -4407,12 +4404,29 @@ async function loadCredits() {
 }
 
 function updateCreditsDisplay() {
-  const el = document.getElementById('credits-display');
-  const bigEl = document.getElementById('credits-balance-big');
   const sidebar = document.getElementById('sidebar-credits');
-  if (el) el.textContent = userCredits;
-  if (bigEl) bigEl.textContent = userCredits;
+  const detailEl = document.getElementById('sidebar-plan-detail');
+  const bigEl = document.getElementById('credits-balance-big');
+
   if (sidebar) sidebar.style.display = 'block';
+  if (bigEl) bigEl.textContent = userPlan === 'vip' ? '∞' : userCredits;
+
+  if (!detailEl) return;
+
+  if (userPlan === 'vip') {
+    detailEl.textContent = 'Abonnement VIP · Crédits illimités';
+  } else if (userPlan === 'standard') {
+    detailEl.textContent = `Abonnement Standard · ${userCredits} crédits disponibles`;
+  } else {
+    // Vérifier si en période d'essai
+    const trialEnd = window._trialEndsAt;
+    if (trialEnd) {
+      const days = Math.ceil((new Date(trialEnd) - new Date()) / (1000 * 60 * 60 * 24));
+      detailEl.textContent = days > 0 ? `Période d'essai · ${days} jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}` : 'Essai expiré';
+    } else {
+      detailEl.textContent = 'Aucun abonnement actif';
+    }
+  }
 }
 
 async function debitCredit() {
@@ -4513,6 +4527,7 @@ async function loadSubscriptionStatus() {
   const status = data.subscription_status || 'inactive';
   const periodEnd = data.current_period_end || data.trial_ends_at;
   const endDate = periodEnd ? new Date(periodEnd).toLocaleDateString('fr-FR') : null;
+  window._trialEndsAt = data.trial_ends_at || null;
 
   const nameEl = document.getElementById('plan-name-display');
   const detailEl = document.getElementById('plan-status-detail');
