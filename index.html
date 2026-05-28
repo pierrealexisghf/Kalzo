@@ -1138,42 +1138,43 @@
       <!-- ═══════════════════════════════════════ -->
       <div id="page-credits" class="tab-content">
         <div class="mb-6">
-          <h1 class="font-display text-3xl font-bold mb-1">Crédits <span style="color:var(--accent-green);">IA</span></h1>
-          <p style="color:var(--text-muted);font-size:14px;">Rechargez vos crédits pour utiliser les fonctionnalités IA</p>
+          <h1 class="font-display text-3xl font-bold mb-1">Mon <span style="color:var(--accent-green);">Abonnement</span></h1>
+          <p style="color:var(--text-muted);font-size:14px;">Gérez votre abonnement Kalzo</p>
         </div>
 
-        <!-- Solde actuel -->
-        <div class="card p-6 mb-5" style="border-color:#bbf7d0;background:var(--accent-green-light);">
-          <div style="font-size:13px;color:var(--accent-green);font-weight:600;margin-bottom:6px;">VOTRE SOLDE ACTUEL</div>
-          <div style="font-size:48px;font-weight:800;color:var(--accent-green);" id="credits-balance-big">—</div>
-          <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">crédits disponibles · 1 crédit = 1 appel IA</div>
+        <!-- Plan actif -->
+        <div class="card p-6 mb-5" id="plan-status-card" style="border-color:#bbf7d0;background:var(--accent-green-light);">
+          <div style="font-size:13px;color:var(--accent-green);font-weight:600;margin-bottom:6px;">VOTRE PLAN ACTUEL</div>
+          <div style="font-size:32px;font-weight:800;color:var(--accent-green);" id="plan-name-display">—</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:4px;" id="plan-status-detail">Chargement...</div>
+          <div style="margin-top:12px;" id="plan-credits-info"></div>
+          <button id="btn-cancel-sub" onclick="cancelSubscription()" style="display:none;margin-top:16px;background:transparent;border:1px solid #fca5a5;color:#ef4444;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-weight:600;">Résilier mon abonnement</button>
         </div>
 
-        <!-- Packs -->
-        <h2 class="font-display text-xl font-bold mb-4">Choisir un pack</h2>
-        <div class="grid md:grid-cols-3 gap-4 mb-6">
-          <div class="card p-5 text-center" style="cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#86efac'" onmouseout="this.style.borderColor='var(--border)'" onclick="buyCredits('starter',5,100)">
+        <!-- Choisir un plan -->
+        <h2 class="font-display text-xl font-bold mb-4" id="plans-title">Choisir un abonnement</h2>
+        <div class="grid md:grid-cols-2 gap-4 mb-6" id="plans-grid">
+          <div class="card p-5 text-center" style="cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#86efac'" onmouseout="this.style.borderColor='var(--border)'" onclick="subscribe('standard')">
             <div style="font-size:32px;margin-bottom:8px;">⚡</div>
-            <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Pack Starter</div>
-            <div style="font-size:28px;font-weight:800;color:var(--accent-green);margin-bottom:4px;">5€</div>
-            <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">100 crédits · ~1 mois</div>
-            <button class="btn-primary w-full" onclick="buyCredits('starter',5,100)">Acheter</button>
+            <div style="font-weight:700;font-size:18px;margin-bottom:4px;">Standard</div>
+            <div style="font-size:32px;font-weight:800;color:var(--accent-green);margin-bottom:4px;">7€<span style="font-size:14px;font-weight:400;color:var(--text-muted);">/mois</span></div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">120 crédits IA / mois · renouvelé automatiquement</div>
+            <button class="btn-primary w-full" onclick="subscribe('standard')">Commencer l'essai gratuit</button>
           </div>
-          <div class="card p-5 text-center" style="cursor:pointer;border-color:var(--accent-green);background:var(--accent-green-light);transition:all 0.15s;" onclick="buyCredits('premium',10,300)">
-            <div style="font-size:10px;font-weight:700;color:var(--accent-green);letter-spacing:0.05em;margin-bottom:4px;">⭐ POPULAIRE</div>
-            <div style="font-size:32px;margin-bottom:8px;">🚀</div>
-            <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Pack Premium</div>
-            <div style="font-size:28px;font-weight:800;color:var(--accent-green);margin-bottom:4px;">10€</div>
-            <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">300 crédits · ~3 mois · -17%</div>
-            <button class="btn-primary w-full" onclick="buyCredits('premium',10,300)">Acheter</button>
-          </div>
-          <div class="card p-5 text-center" style="cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#86efac'" onmouseout="this.style.borderColor='var(--border)'" onclick="buyCredits('vip',20,1000)">
+          <div class="card p-5 text-center" style="cursor:pointer;border-color:var(--accent-green);background:var(--accent-green-light);transition:all 0.15s;" onclick="subscribe('vip')">
+            <div style="font-size:10px;font-weight:700;color:var(--accent-green);letter-spacing:0.05em;margin-bottom:4px;">⭐ MEILLEUR PLAN</div>
             <div style="font-size:32px;margin-bottom:8px;">💎</div>
-            <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Pack VIP</div>
-            <div style="font-size:28px;font-weight:800;color:var(--accent-green);margin-bottom:4px;">20€</div>
-            <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">1000 crédits · ~10 mois · -33%</div>
-            <button class="btn-primary w-full" onclick="buyCredits('vip',20,1000)">Acheter</button>
+            <div style="font-weight:700;font-size:18px;margin-bottom:4px;">VIP</div>
+            <div style="font-size:32px;font-weight:800;color:var(--accent-green);margin-bottom:4px;">10€<span style="font-size:14px;font-weight:400;color:var(--text-muted);">/mois</span></div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Crédits illimités · accès total à toutes les fonctionnalités</div>
+            <button class="btn-primary w-full" onclick="subscribe('vip')">Commencer l'essai gratuit</button>
           </div>
+        </div>
+
+        <!-- Trial info -->
+        <div class="card p-4 mb-5" style="border-color:#bfdbfe;background:#eff6ff;">
+          <div style="font-size:13px;color:#1e40af;font-weight:600;margin-bottom:4px;">🎁 7 jours d'essai gratuit</div>
+          <div style="font-size:13px;color:#3b82f6;">Testez Kalzo gratuitement pendant 7 jours. Aucun débit avant la fin de la période d'essai. Résiliez à tout moment.</div>
         </div>
 
         <!-- Ce que consomme chaque feature -->
@@ -1194,7 +1195,7 @@
             </div>
           </div>
           <div style="margin-top:12px;font-size:12px;color:var(--text-muted);background:#f9fafb;border-radius:8px;padding:10px;">
-            💡 Un utilisateur actif utilise en moyenne 20-25 crédits par semaine.
+            💡 Plan VIP = crédits illimités, aucune restriction.
           </div>
         </div>
       </div>
@@ -4181,7 +4182,7 @@ function showPage(page) {
   if (page === 'recipes') renderRecipes(RECIPES, BREAKFAST_RECIPES);
   if (page === 'restaurant') { renderRestaurantGuide(); }
   if (page === 'history') renderHistory();
-  if (page === 'credits') { updateCreditsDisplay(); }
+  if (page === 'credits') { loadSubscriptionStatus(); }
   if (page === 'profile') { initProfilePage(); }
   if (page === 'planner') restorePlanIfExists();
 
@@ -4402,6 +4403,7 @@ async function loadCredits() {
     userCredits = data.balance;
     updateCreditsDisplay();
   }
+  await loadSubscriptionStatus();
 }
 
 function updateCreditsDisplay() {
@@ -4415,17 +4417,20 @@ function updateCreditsDisplay() {
 
 async function debitCredit() {
   if (!currentUser) return true;
+
+  // VIP = crédits illimités, pas de débit
+  if (userPlan === 'vip') return true;
+
   // Always read fresh balance from Supabase
   const { data, error: fetchError } = await sb.from('credits').select('balance').eq('user_id', currentUser.id).single();
   if (fetchError) {
-    // Token probablement expiré - forcer reconnexion
     toast('⚠️ Session expirée, veuillez vous reconnecter.');
     await sb.auth.signOut();
     return false;
   }
   const currentBalance = data?.balance ?? 0;
   if (currentBalance <= 0) {
-    toast('❌ Plus de crédits IA ! Rechargez dans l\'onglet Crédits.');
+    toast('❌ Plus de crédits IA ! Abonnez-vous dans l\'onglet Abonnement.');
     showPage('credits');
     return false;
   }
@@ -4443,17 +4448,16 @@ async function debitCredit() {
   return true;
 }
 
-async function buyCredits(pack, euros, credits) {
+async function subscribe(plan) {
   if (!currentUser) { toast('⚠️ Connectez-vous d\'abord'); return; }
 
   const priceIds = {
-    'starter': 'price_1TQDgU1JEMfMTdulDKqWmCRr',
-    'premium': 'price_1TQDhs1JEMfMTdulWadiAsXG',
-    'vip':     'price_1TQDia1JEMfMTdulFbEP1OEx',
+    'standard': 'price_1Tc6S51JEMfMTdulDYObGtXg',
+    'vip':      'price_1Tc6Sf1JEMfMTdulDT6umOCm',
   };
 
-  const priceId = priceIds[pack];
-  if (!priceId) { toast('❌ Pack invalide'); return; }
+  const priceId = priceIds[plan];
+  if (!priceId) { toast('❌ Plan invalide'); return; }
 
   toast('⏳ Redirection vers le paiement...');
 
@@ -4465,16 +4469,93 @@ async function buyCredits(pack, euros, credits) {
         priceId,
         userId: currentUser.id,
         userEmail: currentUser.email,
-        credits,
       })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    window.location.href = data.url; // redirect to Stripe Checkout
+    window.location.href = data.url;
   } catch(err) {
     toast('❌ Erreur : ' + err.message);
   }
 }
+
+async function cancelSubscription() {
+  if (!currentUser) return;
+  if (!confirm('Confirmer la résiliation ? Votre accès reste actif jusqu\'à la fin de la période en cours.')) return;
+
+  toast('⏳ Résiliation en cours...');
+  try {
+    const res = await fetch('/api/cancel-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUser.id })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    toast('✅ Abonnement résilié. Accès maintenu jusqu\'à la fin de la période.');
+    await loadSubscriptionStatus();
+  } catch(err) {
+    toast('❌ Erreur : ' + err.message);
+  }
+}
+
+let userPlan = 'free';
+
+async function loadSubscriptionStatus() {
+  if (!currentUser) return;
+  const { data } = await sb.from('profiles')
+    .select('plan, subscription_status, current_period_end, trial_ends_at')
+    .eq('id', currentUser.id).single();
+
+  if (!data) return;
+
+  userPlan = data.plan || 'free';
+  const status = data.subscription_status || 'inactive';
+  const periodEnd = data.current_period_end || data.trial_ends_at;
+  const endDate = periodEnd ? new Date(periodEnd).toLocaleDateString('fr-FR') : null;
+
+  const nameEl = document.getElementById('plan-name-display');
+  const detailEl = document.getElementById('plan-status-detail');
+  const creditsInfoEl = document.getElementById('plan-credits-info');
+  const cancelBtn = document.getElementById('btn-cancel-sub');
+  const plansTitle = document.getElementById('plans-title');
+  const plansGrid = document.getElementById('plans-grid');
+
+  if (nameEl) {
+    if (userPlan === 'vip') nameEl.textContent = '💎 Plan VIP';
+    else if (userPlan === 'standard') nameEl.textContent = '⚡ Plan Standard';
+    else nameEl.textContent = '🆓 Aucun abonnement';
+  }
+
+  if (detailEl) {
+    if (status === 'trialing') detailEl.textContent = `Période d'essai · se termine le ${endDate}`;
+    else if (status === 'active') detailEl.textContent = `Actif · prochain renouvellement le ${endDate}`;
+    else if (status === 'past_due') detailEl.textContent = '⚠️ Paiement en échec · mettez à jour votre moyen de paiement';
+    else detailEl.textContent = 'Aucun abonnement actif';
+  }
+
+  if (creditsInfoEl) {
+    if (userPlan === 'vip') creditsInfoEl.innerHTML = '<span style="font-size:13px;color:var(--accent-green);font-weight:600;">✨ Crédits illimités</span>';
+    else if (userPlan === 'standard') creditsInfoEl.innerHTML = `<span style="font-size:13px;color:var(--text-muted);">Crédits restants : <strong style="color:var(--accent-green);">${userCredits}</strong> / 120</span>`;
+    else creditsInfoEl.innerHTML = '';
+  }
+
+  // Bouton résiliation visible seulement si abonnement actif
+  if (cancelBtn) cancelBtn.style.display = (status === 'active' || status === 'trialing') ? 'block' : 'none';
+
+  // Masquer les plans si déjà abonné
+  if (plansTitle && plansGrid) {
+    const hasActiveSub = status === 'active' || status === 'trialing';
+    plansTitle.style.display = hasActiveSub ? 'none' : 'block';
+    plansGrid.style.display = hasActiveSub ? 'none' : 'grid';
+  }
+
+  // Mettre à jour sidebar
+  updateCreditsDisplay();
+}
+
+// Garder buyCredits comme alias pour compatibilité
+function buyCredits() { showPage('credits'); }
 
 // ── Load user data from Supabase ─────────────────────────────
 async function loadUserData(user) {
