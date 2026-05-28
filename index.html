@@ -4398,9 +4398,8 @@ async function loadCredits() {
   const { data } = await sb.from('credits').select('balance').eq('user_id', currentUser.id).single();
   if (data) {
     userCredits = data.balance;
-    updateCreditsDisplay();
   }
-  await loadSubscriptionStatus();
+  await loadSubscriptionStatus(); // updateCreditsDisplay est appelé à la fin de loadSubscriptionStatus
 }
 
 function updateCreditsDisplay() {
