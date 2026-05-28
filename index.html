@@ -4702,7 +4702,7 @@ async function loadUserData(user) {
       .single();
     userCredits = newCredits?.balance ?? 20;
   }
-  updateCreditsDisplay();
+  await loadSubscriptionStatus();
 
   // 8. Load hydration (last 7 days)
   await loadWaterFromSupabase();
