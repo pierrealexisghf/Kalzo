@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0a0f0a;
+  --card: #111811;
+  --card2: #161e16;
+  --border: rgba(255,255,255,0.07);
+  --green: #16a34a;
+  --green-light: #4ade80;
+  --green-dim: rgba(22,163,74,0.12);
+  --text: #f0f4f0;
+  --muted: #7a9a7a;
+  --dim: #3a5a3a;
+  --rose: #f43f5e;
+  --blue: #3b82f6;
+  --amber: #f59e0b;
+  --bottom-nav-h: 72px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Scrollbar hidden */
+::-webkit-scrollbar { width: 0; }
+
+/* Inputs */
+input, textarea, select {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--green);
+}
+select option {
+  background: var(--card2);
+}
+
+/* Animations */
+@keyframes pulse-dot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.font-display {
+  font-family: 'Outfit', sans-serif;
+}
