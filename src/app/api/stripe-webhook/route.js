@@ -36,21 +36,18 @@ async function updateProfile(userId, data) {
 async function updateCredits(userId, plan) {
   const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_KEY
   const newBalance = plan === 'vip' ? 999999 : plan === 'free' ? 0 : CREDITS_STANDARD
-  const getRes = await fetch(`${SUPABASE_URL}/rest/v1/credits?user_id=eq.${userId}&select=balance`, {
-    headers: { 'apikey': SUPABASE_SERVICE, 'Authorization': `Bearer ${SUPABASE_SERVICE}` }
+  // Upsert plutôt qu'un PATCH conditionnel : un tout nouvel abonné n'a pas
+  // encore de ligne credits, et un PATCH sur une ligne inexistante ne fait rien.
+  await fetch(`${SUPABASE_URL}/rest/v1/credits?on_conflict=user_id`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_SERVICE,
+      'Authorization': `Bearer ${SUPABASE_SERVICE}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates',
+    },
+    body: JSON.stringify({ user_id: userId, balance: newBalance, updated_at: new Date().toISOString() }),
   })
-  const existing = await getRes.json()
-  if (existing.length > 0) {
-    await fetch(`${SUPABASE_URL}/rest/v1/credits?user_id=eq.${userId}`, {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_SERVICE,
-        'Authorization': `Bearer ${SUPABASE_SERVICE}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ balance: newBalance, updated_at: new Date().toISOString() }),
-    })
-  }
 }
 
 export async function POST(request) {

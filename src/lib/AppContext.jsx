@@ -97,7 +97,17 @@ export function AppProvider({ children }) {
       .select('balance')
       .eq('user_id', u.id)
       .single()
-    if (creditsData) setCredits(creditsData.balance)
+    if (creditsData) {
+      setCredits(creditsData.balance)
+    } else {
+      // Pas encore de ligne credits (nouveau compte) — la créer.
+      const { data: newCredits } = await supabase
+        .from('credits')
+        .upsert({ user_id: u.id, balance: 10 }, { onConflict: 'user_id' })
+        .select('balance')
+        .single()
+      setCredits(newCredits?.balance ?? 0)
+    }
 
     // Repas du mois
     const thirtyDaysAgo = new Date()
