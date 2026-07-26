@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useApp } from '@/lib/AppContext'
+import { supabase } from '@/lib/supabase'
 import { todayKey, getTodayWater, getTodayBurnedKcal } from '@/lib/nutrition'
 
 const TABS = [
@@ -222,16 +223,21 @@ function SportTab() {
 }
 
 function PoidsTab() {
-  const { weightGoal, weightEntries, setWeightGoal, setWeightEntries, showToast, user } = useApp()
-  const { supabase } = require('@/lib/supabase')
+  const { profile, weightGoal, weightEntries, setWeightGoal, setWeightEntries, showToast, user } = useApp()
   const [newWeight, setNewWeight] = useState('')
   const [goalInput, setGoalInput] = useState('')
 
   const saveGoal = async () => {
-    const g = parseFloat(goalInput)
-    if (!g) return
-    setWeightGoal(g)
-    await supabase.from('profiles').update({ weight_goal: g }).eq('id', user.id)
+    const target = parseFloat(goalInput)
+    if (!target) return
+    const goal = {
+      targetWeight: target,
+      weeks: weightGoal?.weeks || 8,
+      startDate: weightGoal?.startDate || todayKey(),
+      startWeight: weightGoal?.startWeight || profile?.weight || target,
+    }
+    setWeightGoal(goal)
+    await supabase.from('profiles').update({ weight_goal: JSON.stringify(goal) }).eq('id', user.id)
     showToast('✅ Objectif sauvegardé')
     setGoalInput('')
   }
@@ -239,10 +245,10 @@ function PoidsTab() {
   const addWeight = async () => {
     const w = parseFloat(newWeight)
     if (!w) return
-    const entry = { date: new Date().toISOString(), weight: w }
+    const entry = { date: todayKey(), weight: w }
     const newEntries = [...(weightEntries || []), entry]
     setWeightEntries(newEntries)
-    await supabase.from('profiles').update({ weight_entries: newEntries }).eq('id', user.id)
+    await supabase.from('profiles').update({ weight_entries: JSON.stringify(newEntries) }).eq('id', user.id)
     showToast('✅ Pesée ajoutée')
     setNewWeight('')
   }
@@ -252,7 +258,7 @@ function PoidsTab() {
       <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: 14, marginBottom: 12 }}>
         <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 8 }}>OBJECTIF DE POIDS (kg)</label>
         <div style={{ display: 'flex', gap: 8 }}>
-          <input type="number" value={goalInput} onChange={e => setGoalInput(e.target.value)} placeholder={weightGoal ? `Actuel: ${weightGoal}kg` : 'Ex: 75'} style={{ flex: 1 }} />
+          <input type="number" value={goalInput} onChange={e => setGoalInput(e.target.value)} placeholder={weightGoal?.targetWeight ? `Actuel: ${weightGoal.targetWeight}kg` : 'Ex: 75'} style={{ flex: 1 }} />
           <button onClick={saveGoal} style={{
             background: 'var(--card2)', border: '1px solid var(--border)', color: 'var(--green-light)',
             borderRadius: 10, padding: '11px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer',

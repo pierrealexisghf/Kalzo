@@ -6,6 +6,18 @@ import { todayKey } from './nutrition'
 
 const AppContext = createContext(null)
 
+// weight_goal / weight_entries sont stockés en base sous forme de texte JSON
+// (hérité de l'ancienne version de l'app) plutôt que jsonb.
+function parseJsonField(value) {
+  if (value == null) return null
+  if (typeof value !== 'string') return value
+  try {
+    return JSON.parse(value)
+  } catch {
+    return null
+  }
+}
+
 export function AppProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -74,8 +86,8 @@ export function AppProvider({ children }) {
       setSubStatus(profileData.subscription_status || 'inactive')
       setTrialEndsAt(profileData.trial_ends_at || null)
       setPeriodEnd(profileData.current_period_end || null)
-      setWeightGoal(profileData.weight_goal || null)
-      setWeightEntries(profileData.weight_entries || [])
+      setWeightGoal(parseJsonField(profileData.weight_goal))
+      setWeightEntries(parseJsonField(profileData.weight_entries) || [])
       if (profileData.current_plan) setCurrentPlan(profileData.current_plan)
     }
 
