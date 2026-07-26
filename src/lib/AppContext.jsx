@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { supabase } from './supabase'
-import { todayKey } from './nutrition'
+import { todayKey, weekKey } from './nutrition'
 
 const AppContext = createContext(null)
 
@@ -74,13 +74,12 @@ export function AppProvider({ children }) {
         height: profileData.height,
         age: profileData.age,
         gender: profileData.gender,
-        activity: profileData.activity_level,
+        activity: profileData.activity,
         goal: profileData.goal,
-        kcal: profileData.daily_kcal,
-        tdee: profileData.tdee,
-        prot: profileData.daily_prot,
-        lip: profileData.daily_lip,
-        gluc: profileData.daily_gluc,
+        kcal: profileData.kcal,
+        prot: profileData.prot,
+        lip: profileData.lip,
+        gluc: profileData.gluc,
       })
       setUserPlan(profileData.plan || 'free')
       setSubStatus(profileData.subscription_status || 'inactive')
@@ -88,7 +87,8 @@ export function AppProvider({ children }) {
       setPeriodEnd(profileData.current_period_end || null)
       setWeightGoal(parseJsonField(profileData.weight_goal))
       setWeightEntries(parseJsonField(profileData.weight_entries) || [])
-      if (profileData.current_plan) setCurrentPlan(profileData.current_plan)
+      const savedPlan = parseJsonField(profileData.current_plan)
+      if (savedPlan && savedPlan.week === weekKey()) setCurrentPlan(savedPlan.plan)
     }
 
     // Crédits
@@ -118,10 +118,11 @@ export function AppProvider({ children }) {
         byDay[day].push({
           id: m.id,
           supabaseId: m.id,
-          name: m.meal_name,
+          name: m.name,
           emoji: m.emoji || '🍽️',
-          macros: { kcal: m.kcal || 0, prot: m.prot || 0, gluc: m.gluc || 0, lip: m.lip || 0 },
+          macros: m.macros || { kcal: 0, prot: 0, gluc: 0, lip: 0 },
           mealType: m.meal_type,
+          mainIngredients: m.main_ingredients || [],
           time: m.consumed_at,
         })
       })
@@ -133,19 +134,19 @@ export function AppProvider({ children }) {
       .from('sport_activities')
       .select('*')
       .eq('user_id', u.id)
-      .gte('performed_at', thirtyDaysAgo.toISOString())
+      .gte('activity_date', thirtyDaysAgo.toISOString().slice(0, 10))
 
     if (sportData) {
       const bySportDay = {}
       sportData.forEach(s => {
-        const day = s.performed_at.slice(0, 10)
+        const day = s.activity_date
         if (!bySportDay[day]) bySportDay[day] = []
         bySportDay[day].push({
           id: s.id,
           supabaseId: s.id,
-          name: s.activity_name,
+          name: s.name,
           kcal: s.kcal_burned || 0,
-          duration: s.duration_minutes || 0,
+          duration: s.duration || 0,
           emoji: s.emoji || '🏃',
         })
       })
@@ -164,10 +165,10 @@ export function AppProvider({ children }) {
     if (hydrationData) {
       const waterByDay = {}
       hydrationData.forEach(h => {
-        waterByDay[h.date] = { total: h.amount_ml || 0 }
+        waterByDay[h.date] = { total: h.ml || 0 }
       })
       setDailyWater(waterByDay)
-      if (hydrationData[0]?.goal_ml) setWaterGoal(hydrationData[0].goal_ml)
+      if (hydrationData[0]?.goal) setWaterGoal(hydrationData[0].goal)
     }
   }
 
@@ -197,17 +198,21 @@ export function AppProvider({ children }) {
   const addMeal = useCallback(async (entry) => {
     if (!user) return
     const today = todayKey()
-    const { data } = await supabase.from('consumed_meals').insert({
+    const { data, error } = await supabase.from('consumed_meals').insert({
       user_id: user.id,
-      meal_name: entry.name,
+      name: entry.name,
       emoji: entry.emoji || '🍽️',
-      kcal: entry.macros?.kcal || 0,
-      prot: entry.macros?.prot || 0,
-      gluc: entry.macros?.gluc || 0,
-      lip: entry.macros?.lip || 0,
+      main_ingredients: entry.mainIngredients || entry.ingredients || [],
+      macros: entry.macros || { kcal: 0, prot: 0, gluc: 0, lip: 0 },
       meal_type: entry.mealType || 'repas',
+      source: entry.source || 'manual',
       consumed_at: new Date().toISOString(),
     }).select().single()
+
+    if (error) {
+      showToast('❌ Erreur lors de l\'enregistrement du repas')
+      return
+    }
 
     if (data) {
       const meal = { ...entry, id: data.id, supabaseId: data.id }
@@ -216,7 +221,7 @@ export function AppProvider({ children }) {
         [today]: [...(prev[today] || []), meal]
       }))
     }
-  }, [user])
+  }, [user, showToast])
 
   // Supprimer un repas
   const removeMeal = useCallback(async (mealId, day) => {
@@ -232,15 +237,20 @@ export function AppProvider({ children }) {
   const addSport = useCallback(async (entry) => {
     if (!user) return
     const today = todayKey()
-    const { data } = await supabase.from('sport_activities').insert({
+    const { data, error } = await supabase.from('sport_activities').insert({
       user_id: user.id,
-      activity_name: entry.name,
+      name: entry.name,
       emoji: entry.emoji || '🏃',
       kcal_burned: entry.kcal || 0,
-      duration_minutes: entry.duration || 0,
+      duration: entry.duration || 0,
       intensity: entry.intensity || 'moderate',
-      performed_at: new Date().toISOString(),
+      activity_date: today,
     }).select().single()
+
+    if (error) {
+      showToast('❌ Erreur lors de l\'enregistrement de l\'activité')
+      return
+    }
 
     if (data) {
       const sport = { ...entry, id: data.id, supabaseId: data.id }
@@ -249,7 +259,7 @@ export function AppProvider({ children }) {
         [today]: [...(prev[today] || []), sport]
       }))
     }
-  }, [user])
+  }, [user, showToast])
 
   // Supprimer sport
   const removeSport = useCallback(async (sportId, day) => {
@@ -270,8 +280,8 @@ export function AppProvider({ children }) {
     await supabase.from('hydration').upsert({
       user_id: user.id,
       date: today,
-      amount_ml: newTotal,
-      goal_ml: waterGoal,
+      ml: newTotal,
+      goal: waterGoal,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id,date' })
     setDailyWater(prev => ({ ...prev, [today]: { total: newTotal } }))
@@ -283,8 +293,9 @@ export function AppProvider({ children }) {
     await supabase.from('hydration').upsert({
       user_id: user.id,
       date: today,
-      amount_ml: 0,
-      goal_ml: waterGoal,
+      ml: 0,
+      goal: waterGoal,
+      updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id,date' })
     setDailyWater(prev => ({ ...prev, [today]: { total: 0 } }))
   }, [user, waterGoal])
@@ -294,17 +305,17 @@ export function AppProvider({ children }) {
     if (!user) return
     await supabase.from('profiles').upsert({
       id: user.id,
+      email: user.email,
       weight: p.weight,
       height: p.height,
       age: p.age,
       gender: p.gender,
-      activity_level: p.activity,
+      activity: p.activity,
       goal: p.goal,
-      daily_kcal: p.kcal,
-      tdee: p.tdee,
-      daily_prot: p.prot,
-      daily_lip: p.lip,
-      daily_gluc: p.gluc,
+      kcal: p.kcal,
+      prot: p.prot,
+      lip: p.lip,
+      gluc: p.gluc,
     })
     setProfile(p)
   }, [user])
@@ -312,7 +323,9 @@ export function AppProvider({ children }) {
   // Sauvegarder plan 7j
   const savePlan = useCallback(async (plan) => {
     if (!user) return
-    await supabase.from('profiles').update({ current_plan: plan }).eq('id', user.id)
+    await supabase.from('profiles').update({
+      current_plan: JSON.stringify({ plan, week: weekKey() }),
+    }).eq('id', user.id)
     setCurrentPlan(plan)
   }, [user])
 

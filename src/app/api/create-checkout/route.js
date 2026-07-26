@@ -1,9 +1,10 @@
 export async function POST(request) {
   try {
     const { priceId, userId, userEmail } = await request.json()
-    const siteUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'https://kalzo.vercel.app'
+    // VERCEL_URL pointe vers l'alias interne du déploiement (protégé par
+    // Vercel Authentication), pas vers le domaine public — on utilise
+    // toujours le domaine custom pour la redirection post-paiement.
+    const siteUrl = 'https://kalzo.vercel.app'
 
     const PRICE_STANDARD = 'price_1Tc6S51JEMfMTdulDYObGtXg'
     const PRICE_VIP = 'price_1Tc6Sf1JEMfMTdulDT6umOCm'

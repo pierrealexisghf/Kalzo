@@ -22,6 +22,18 @@ export function todayKey() {
   return new Date().toISOString().slice(0, 10)
 }
 
+export function weekKey(date) {
+  const d = date ? new Date(date) : new Date()
+  const day = d.getDay()
+  const diff = (day === 0) ? -6 : 1 - day
+  const monday = new Date(d)
+  monday.setDate(d.getDate() + diff)
+  const y = monday.getFullYear()
+  const start = new Date(y, 0, 1)
+  const weekNum = Math.ceil(((monday - start) / 86400000 + start.getDay() + 1) / 7)
+  return `${y}-W${String(weekNum).padStart(2, '0')}`
+}
+
 export function getTodayConsumedKcal(dailyMeals) {
   const today = todayKey()
   const meals = dailyMeals[today] || []
