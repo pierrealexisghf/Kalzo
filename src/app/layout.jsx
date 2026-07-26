@@ -4,12 +4,15 @@ export const metadata = {
   title: 'Kalzo — Coach Nutrition IA',
   description: 'Votre coach nutrition personnalisé avec IA',
   manifest: '/manifest.json',
-  themeColor: '#16a34a',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'Kalzo',
   },
+}
+
+export const viewport = {
+  themeColor: '#16a34a',
 }
 
 export default function RootLayout({ children }) {
