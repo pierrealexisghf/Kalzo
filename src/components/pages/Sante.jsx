@@ -116,13 +116,74 @@ function EauTab() {
 }
 
 function SportTab() {
-  const { dailySport, addSport, removeSport, showToast, debitCredit } = useApp()
+  const { dailySport, addSport, removeSport, showToast, debitCredit, profile } = useApp()
   const today = todayKey()
   const todaySports = dailySport[today] || []
   const totalKcal = todaySports.reduce((s, a) => s + (a.kcal || 0), 0)
   const [name, setName] = useState('')
   const [kcal, setKcal] = useState('')
   const [duration, setDuration] = useState('')
+  const [iaText, setIaText] = useState('')
+  const [iaLoading, setIaLoading] = useState(false)
+  const [iaResult, setIaResult] = useState(null)
+
+  const analyzeSport = async () => {
+    if (!iaText.trim()) return showToast('⚠️ Décrivez votre activité sportive')
+    const ok = await debitCredit()
+    if (!ok) return
+    setIaLoading(true)
+    setIaResult(null)
+    try {
+      const weight = profile?.weight || 75
+      const res = await fetch('/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          max_tokens: 700,
+          messages: [{
+            role: 'user',
+            content: `Tu es un expert en physiologie du sport et dépense énergétique.
+Profil : ${weight}kg.
+Activité décrite : "${iaText}"
+
+Calcule précisément les calories brûlées. Réponds UNIQUEMENT en JSON valide (pas de markdown) avec ce format:
+{
+  "name": "Nom de l'activité",
+  "emoji": "🏃",
+  "duration_minutes": 30,
+  "intensity": "légère/modérée/intense/très intense",
+  "kcal_burned": 280,
+  "met_value": 7.5,
+  "muscles_worked": ["quadriceps", "mollets"],
+  "tip": "Conseil récupération ou progression"
+}`
+          }]
+        })
+      })
+      const data = await res.json()
+      const raw = data.content?.[0]?.text || ''
+      const clean = raw.replace(/```json|```/g, '').trim()
+      setIaResult(JSON.parse(clean))
+    } catch (e) {
+      showToast('❌ Erreur lors de l\'analyse')
+    } finally {
+      setIaLoading(false)
+    }
+  }
+
+  const confirmIaSport = async () => {
+    if (!iaResult) return
+    await addSport({
+      name: iaResult.name,
+      emoji: iaResult.emoji || '🏃',
+      kcal: iaResult.kcal_burned || 0,
+      duration: iaResult.duration_minutes || 0,
+      intensity: iaResult.intensity || 'modérée',
+    })
+    showToast(`🔥 ${iaResult.kcal_burned || 0} kcal brûlées enregistrées !`)
+    setIaResult(null)
+    setIaText('')
+  }
 
   const quickSports = [
     { name: 'Course à pied', emoji: '🏃', kcalPerMin: 10 },
@@ -152,6 +213,62 @@ function SportTab() {
         }}>
           <div className="font-display" style={{ fontSize: 28, fontWeight: 800, color: '#3b82f6' }}>{totalKcal} kcal</div>
           <div style={{ fontSize: 12, color: 'var(--muted)' }}>brûlées aujourd'hui</div>
+        </div>
+      )}
+
+      {/* Analyse IA */}
+      {!iaResult ? (
+        <div style={{ background: 'var(--card)', border: '1px solid rgba(244,63,94,0.2)', borderRadius: 14, padding: 14, marginBottom: 16 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--rose)', marginBottom: 10 }}>✦ ANALYSE IA</div>
+          <textarea value={iaText} onChange={e => setIaText(e.target.value)} rows={2}
+            placeholder="Ex: 30 minutes de course à pied à allure modérée" style={{ resize: 'none', marginBottom: 10 }} />
+          <button onClick={analyzeSport} disabled={iaLoading} style={{
+            width: '100%', background: iaLoading ? 'var(--dim)' : 'var(--rose)', color: '#fff', border: 'none',
+            borderRadius: 12, padding: 11, fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14,
+            cursor: iaLoading ? 'not-allowed' : 'pointer',
+          }}>{iaLoading ? '⏳ Calcul en cours...' : '✦ Calculer les calories brûlées'}</button>
+        </div>
+      ) : (
+        <div style={{ background: 'var(--card)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: 16, padding: 16, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <span style={{ fontSize: 32 }}>{iaResult.emoji}</span>
+            <div>
+              <div className="font-display" style={{ fontSize: 16, fontWeight: 800 }}>{iaResult.name}</div>
+              <div style={{ fontSize: 11, color: 'var(--muted)' }}>{iaResult.intensity} · {iaResult.duration_minutes} min</div>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+            <div style={{ textAlign: 'center', background: 'var(--card2)', borderRadius: 10, padding: 10 }}>
+              <div className="font-display" style={{ fontSize: 20, fontWeight: 800, color: 'var(--rose)' }}>{iaResult.kcal_burned}</div>
+              <div style={{ fontSize: 10, color: 'var(--muted)' }}>kcal brûlées</div>
+            </div>
+            <div style={{ textAlign: 'center', background: 'var(--card2)', borderRadius: 10, padding: 10 }}>
+              <div className="font-display" style={{ fontSize: 20, fontWeight: 800, color: 'var(--amber)' }}>{iaResult.met_value}</div>
+              <div style={{ fontSize: 10, color: 'var(--muted)' }}>MET</div>
+            </div>
+          </div>
+          {iaResult.muscles_worked?.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+              {iaResult.muscles_worked.map((m, i) => (
+                <span key={i} style={{ background: 'var(--card2)', borderRadius: 99, padding: '3px 10px', fontSize: 11, color: 'var(--muted)' }}>{m}</span>
+              ))}
+            </div>
+          )}
+          {iaResult.tip && (
+            <div style={{ background: 'var(--green-dim)', borderRadius: 10, padding: 10, marginBottom: 12, fontSize: 12, color: 'var(--muted)' }}>
+              💡 {iaResult.tip}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => { setIaResult(null) }} style={{
+              flex: 1, background: 'transparent', border: '1px solid var(--border)', color: 'var(--muted)',
+              borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            }}>✕ Annuler</button>
+            <button onClick={confirmIaSport} style={{
+              flex: 1, background: 'var(--rose)', color: '#fff', border: 'none',
+              borderRadius: 10, padding: 11, fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+            }}>✅ Ajouter à mon bilan</button>
+          </div>
         </div>
       )}
 
