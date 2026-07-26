@@ -9,8 +9,9 @@ export default function Dashboard({ onNavigate }) {
 
   const consumed = getTodayConsumedKcal(dailyMeals)
   const burned = getTodayBurnedKcal(dailySport)
-  const goal = profile ? (profile.kcal + burned) : 0
-  const remaining = goal > 0 ? Math.max(0, goal - consumed) : 0
+  const net = consumed - burned
+  const goal = profile?.kcal || 0
+  const remaining = goal > 0 ? Math.max(0, goal - net) : 0
   const water = getTodayWater(dailyWater)
   const todayMeals = dailyMeals[today] || []
   const todaySports = dailySport[today] || []
@@ -25,7 +26,7 @@ export default function Dashboard({ onNavigate }) {
 
   // Ring
   const circumference = 289
-  const consumedRatio = goal > 0 ? Math.min(consumed / goal, 1) : 0
+  const netRatio = goal > 0 ? Math.min(Math.max(net, 0) / goal, 1) : 0
   const burnedRatio = goal > 0 ? Math.min(burned / goal, 1) : 0
 
   return (
@@ -46,7 +47,7 @@ export default function Dashboard({ onNavigate }) {
             <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10" />
             <circle cx="55" cy="55" r="46" fill="none" stroke="#16a34a" strokeWidth="10"
               strokeLinecap="round" strokeDasharray={circumference}
-              strokeDashoffset={circumference - consumedRatio * circumference}
+              strokeDashoffset={circumference - netRatio * circumference}
               style={{ transition: 'stroke-dashoffset 0.6s ease' }} />
             <circle cx="55" cy="55" r="46" fill="none" stroke="#3b82f6" strokeWidth="4"
               strokeLinecap="round" strokeDasharray={circumference}
@@ -57,8 +58,9 @@ export default function Dashboard({ onNavigate }) {
             position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center',
           }}>
-            <div className="font-display" style={{ fontSize: 22, fontWeight: 800, color: 'var(--green-light)', lineHeight: 1 }}>{consumed}</div>
-            <div style={{ fontSize: 9, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.05em' }}>kcal</div>
+            <div className="font-display" style={{ fontSize: 22, fontWeight: 800, color: 'var(--green-light)', lineHeight: 1 }}>{net}</div>
+            <div style={{ fontSize: 9, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.05em' }}>kcal net</div>
+            {goal > 0 && <div style={{ fontSize: 8, color: 'var(--dim)', marginTop: 2 }}>/ {goal} kcal</div>}
           </div>
         </div>
         <div style={{ flex: 1 }}>
@@ -99,6 +101,18 @@ export default function Dashboard({ onNavigate }) {
           <div style={{ fontSize: 11, color: 'var(--muted)' }}>Sport aujourd'hui</div>
         </button>
       </div>
+
+      <button onClick={() => onNavigate('bilan')} style={{
+        width: '100%', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
+        padding: '12px 14px', marginBottom: 16, textAlign: 'left', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 18 }}>📊</span>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>Bilan de la semaine</span>
+        </div>
+        <span style={{ color: 'var(--dim)', fontSize: 16 }}>›</span>
+      </button>
 
       {/* Macros */}
       <div style={{

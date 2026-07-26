@@ -52,6 +52,37 @@ export function getTodayWater(dailyWater) {
   return Object.values(dayData).reduce((sum, v) => sum + (v || 0), 0)
 }
 
+export function getWeekDates() {
+  const today = new Date()
+  const dayOfWeek = today.getDay()
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+  const dates = []
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today)
+    d.setDate(today.getDate() + mondayOffset + i)
+    dates.push(d.toISOString().slice(0, 10))
+  }
+  return dates
+}
+
+export function getWeekData(dailyMeals, dailySport) {
+  const dates = getWeekDates()
+  const meals = []
+  const sport = []
+  dates.forEach(dk => {
+    ;(dailyMeals[dk] || []).forEach(m => meals.push(m))
+    ;(dailySport[dk] || []).forEach(a => sport.push(a))
+  })
+  const macros = meals.reduce((acc, m) => ({
+    kcal: acc.kcal + (m.macros?.kcal || 0),
+    prot: acc.prot + (m.macros?.prot || 0),
+    gluc: acc.gluc + (m.macros?.gluc || 0),
+    lip: acc.lip + (m.macros?.lip || 0),
+  }), { kcal: 0, prot: 0, gluc: 0, lip: 0 })
+  const burned = sport.reduce((s, a) => s + (a.kcal || 0), 0)
+  return { macros, burned, mealCount: meals.length, sportCount: sport.length, meals }
+}
+
 export function getGreeting() {
   const h = new Date().getHours()
   if (h < 12) return 'Bonjour'

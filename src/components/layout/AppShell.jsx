@@ -11,6 +11,7 @@ import IA from '@/components/pages/IA'
 import Sante from '@/components/pages/Sante'
 import Profil from '@/components/pages/Profil'
 import Objectifs from '@/components/pages/Objectifs'
+import Bilan from '@/components/pages/Bilan'
 import Abonnement from '@/components/pages/Abonnement'
 import Recettes from '@/components/pages/Recettes'
 import Plan7Jours from '@/components/pages/ia/Plan7Jours'
@@ -26,6 +27,7 @@ const PAGES = {
   sante: Sante,
   profil: Profil,
   objectifs: Objectifs,
+  bilan: Bilan,
   abonnement: Abonnement,
   recettes: Recettes,
   plan: Plan7Jours,

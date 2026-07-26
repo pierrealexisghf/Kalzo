@@ -11,6 +11,7 @@ export default function Profil({ onNavigate }) {
   const menuItems = [
     { icon: '🎯', label: 'Profil & Objectifs', sub: 'Poids, taille, objectif calorique', page: 'objectifs' },
     { icon: '💎', label: 'Abonnement', sub: userPlan === 'vip' ? 'Plan VIP · Crédits illimités' : userPlan === 'standard' ? `Plan Standard · ${credits} crédits` : 'Aucun abonnement', page: 'abonnement' },
+    { icon: '📊', label: 'Bilan de la semaine', sub: 'Macros, sport et bilan net', page: 'bilan' },
     { icon: '🍲', label: 'Recettes (230)', sub: 'Base de données complète', page: 'recettes' },
     { icon: '📅', label: 'Plan 7 Jours', sub: 'Mon menu de la semaine', page: 'plan' },
   ]
