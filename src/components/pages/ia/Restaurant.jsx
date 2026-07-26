@@ -46,6 +46,8 @@ export default function Restaurant({ onNavigate }) {
                 type: 'text',
                 text: `Analyse cette carte de restaurant et identifie les plats. Pour chaque plat visible, estime les valeurs nutritionnelles.
 
+Sois réaliste et généreux dans ton estimation calorique : les plats de restaurant sont systématiquement sous-estimés car on oublie l'huile ou le beurre de cuisson, les sauces (crème, marinades, glaçages sucrés-salés), et les portions généreuses réellement servies. En cas de doute entre plusieurs estimations plausibles, choisis la plus haute plutôt que la plus basse.
+
 Réponds UNIQUEMENT en JSON valide (pas de markdown) avec ce format:
 {
   "dishes": [

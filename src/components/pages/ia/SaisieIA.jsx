@@ -41,6 +41,8 @@ export default function SaisieIA({ onNavigate }) {
         text: `Analyse ce repas et estime ses valeurs nutritionnelles précises.
 ${text ? 'Description: ' + text : 'Analyse l\'image ci-dessus.'}
 
+Sois réaliste et généreux dans ton estimation calorique : les plats faits maison comme au restaurant sont très souvent sous-estimés car on oublie l'huile ou le beurre de cuisson, les sauces (crème fraîche, marinades, glaçages sucrés-salés type yakitori), le fromage, et les portions réelles servies. En cas de doute entre plusieurs estimations plausibles, choisis la plus haute plutôt que la plus basse.
+
 Réponds UNIQUEMENT en JSON valide (pas de markdown) avec ce format:
 {
   "name": "Nom du repas",
