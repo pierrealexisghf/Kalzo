@@ -16,8 +16,8 @@ export default function CGV() {
       <H2>2. Offres et tarifs</H2>
       <UL items={[
         'Offre gratuite : 10 crédits IA offerts à l’inscription, une seule fois, sans carte bancaire.',
-        'Standard : 7 € par mois, 120 crédits IA par mois.',
-        'VIP : 10 € par mois, utilisation des fonctions IA sans décompte de crédits, dans la limite d’un usage raisonnable de 100 demandes par jour.',
+        'Standard : 6,99 € par mois, 120 crédits IA par mois.',
+        'VIP : 9,99 € par mois, utilisation des fonctions IA sans décompte de crédits, dans la limite d’un usage raisonnable de 100 demandes par jour.',
       ]} />
       <P>
         Un crédit correspond à une action IA (analyse d'un repas, recette, analyse de carte, plan sur

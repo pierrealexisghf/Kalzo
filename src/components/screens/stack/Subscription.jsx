@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Sparkles, Check, Gift, Infinity as Inf, CalendarClock } from 'lucide-react'
 import { useApp } from '@/lib/AppContext'
 import { useNav } from '@/lib/nav'
+import { PLANS } from '@/lib/constants'
 import { Button, Card, ScreenHeader, SectionTitle, ConfirmDialog, cx } from '@/components/ui/primitives'
 
 const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null
@@ -67,7 +68,7 @@ export default function Subscription() {
             <Card className="p-5">
               <div className="flex items-start justify-between">
                 <div><div className="text-lg font-bold">Standard</div><div className="text-sm text-muted-foreground">120 crédits IA par mois</div></div>
-                <div className="text-right"><div className="text-3xl font-extrabold leading-none">7 €</div><div className="text-xs text-muted-foreground">par mois</div></div>
+                <div className="text-right"><div className="text-3xl font-extrabold leading-none">{PLANS.standard.label}</div><div className="text-xs text-muted-foreground">par mois</div></div>
               </div>
               <Button size="lg" variant="tone" full className="mt-4" disabled={!cgv} loading={busy === 'standard'} onClick={() => go('standard')}>{cta}</Button>
             </Card>
@@ -75,7 +76,7 @@ export default function Subscription() {
               <span className="absolute right-4 top-0 rounded-b-xl bg-tone px-3 py-1 text-[11px] font-bold text-tone-fg">Le plus complet</span>
               <div className="flex items-start justify-between">
                 <div><div className="flex items-center gap-1.5 text-lg font-bold">VIP <Inf className="size-5 text-tone" /></div><div className="text-sm text-muted-foreground">IA sans compteur de crédits*</div></div>
-                <div className="text-right"><div className="text-3xl font-extrabold leading-none">10 €</div><div className="text-xs text-muted-foreground">par mois</div></div>
+                <div className="text-right"><div className="text-3xl font-extrabold leading-none">{PLANS.vip.label}</div><div className="text-xs text-muted-foreground">par mois</div></div>
               </div>
               <Button size="lg" variant="tone" full className="mt-4" disabled={!cgv} loading={busy === 'vip'} onClick={() => go('vip')}>{cta}</Button>
             </Card>
