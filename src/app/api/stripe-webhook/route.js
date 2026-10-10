@@ -89,6 +89,9 @@ export async function POST(request) {
           current_period_end: iso(sub.current_period_end),
         })
         await setCredits(admin, userId, plan)
+        // Marque l'essai comme consommé : il ne sera plus proposé à ce compte.
+        const { error: metaErr } = await admin.auth.admin.updateUserById(userId, { app_metadata: { trial_used: true } })
+        if (metaErr) throw new Error(`auth: ${metaErr.message}`)
         break
       }
       case 'invoice.payment_succeeded': {

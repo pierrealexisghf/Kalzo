@@ -33,11 +33,13 @@ export async function POST(request) {
     customer_email: user.email,
     'metadata[user_id]': user.id,
     'metadata[plan]': plan,
-    'subscription_data[trial_period_days]': '7',
     'subscription_data[metadata][user_id]': user.id,
     'subscription_data[metadata][plan]': plan,
     allow_promotion_codes: 'true',
   })
+
+  // L'essai gratuit n'est offert qu'une fois par compte (marqueur côté serveur).
+  if (!user.app_metadata?.trial_used) params.set('subscription_data[trial_period_days]', '7')
 
   try {
     const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {

@@ -1,67 +1,166 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #0a0f0a;
-  --card: #111811;
-  --card2: #161e16;
-  --border: rgba(255,255,255,0.07);
-  --green: #16a34a;
-  --green-light: #4ade80;
-  --green-dim: rgba(22,163,74,0.12);
-  --text: #f0f4f0;
-  --muted: #7a9a7a;
-  --dim: #3a5a3a;
-  --rose: #f43f5e;
-  --blue: #3b82f6;
-  --amber: #f59e0b;
-  --bottom-nav-h: 72px;
+/* ============================================================
+   Kalzo — design tokens (refonte 2026-10)
+   DA reprise de Mon Vestiaire : vert profond, cartes très arrondies,
+   mode clair par défaut + mode sombre. Chaque univers a sa teinte.
+   ============================================================ */
+@layer base {
+  :root {
+    --background: 150 22% 97%;
+    --foreground: 160 25% 12%;
+    --card: 0 0% 100%;
+    --primary: 158 64% 22%;
+    --primary-foreground: 0 0% 98%;
+    --muted: 150 16% 94%;
+    --muted-foreground: 160 10% 40%;
+    --accent: 152 30% 93%;
+    --border: 150 14% 88%;
+    --destructive: 0 78% 56%;
+
+    /* Univers */
+    --nutri: 152 56% 36%;       --nutri-soft: 152 44% 92%;
+    --sport: 22 92% 52%;        --sport-soft: 24 95% 93%;
+    --water: 200 88% 46%;       --water-soft: 200 90% 93%;
+    --weight: 262 56% 58%;      --weight-soft: 262 70% 94%;
+    --coach: 172 62% 34%;       --coach-soft: 172 50% 91%;
+
+    /* Macronutriments */
+    --prot: 350 72% 56%;
+    --gluc: 36 94% 48%;
+    --lip: 221 72% 58%;
+
+    --tone: var(--nutri);
+    --tone-soft: var(--nutri-soft);
+    --tone-fg: 0 0% 100%;
+
+    --nav-h: 64px;
+  }
+  .dark {
+    --background: 160 20% 6%;
+    --foreground: 140 15% 96%;
+    --card: 160 16% 9.5%;
+    --primary: 152 54% 48%;
+    --primary-foreground: 160 30% 7%;
+    --muted: 160 12% 14%;
+    --muted-foreground: 150 8% 65%;
+    --accent: 160 16% 17%;
+    --border: 160 12% 18%;
+    --destructive: 0 70% 58%;
+
+    --nutri: 152 56% 52%;       --nutri-soft: 152 30% 14%;
+    --sport: 24 94% 60%;        --sport-soft: 22 40% 15%;
+    --water: 200 92% 60%;       --water-soft: 200 45% 15%;
+    --weight: 262 80% 72%;      --weight-soft: 262 30% 17%;
+    --coach: 172 62% 50%;       --coach-soft: 172 32% 13%;
+
+    --prot: 350 80% 66%;
+    --gluc: 38 95% 58%;
+    --lip: 221 88% 72%;
+
+    --tone-fg: 160 30% 7%;
+  }
+
+  .tone-nutri  { --tone: var(--nutri);  --tone-soft: var(--nutri-soft); }
+  .tone-sport  { --tone: var(--sport);  --tone-soft: var(--sport-soft); }
+  .tone-water  { --tone: var(--water);  --tone-soft: var(--water-soft); }
+  .tone-weight { --tone: var(--weight); --tone-soft: var(--weight-soft); }
+  .tone-coach  { --tone: var(--coach);  --tone-soft: var(--coach-soft); }
+
+  * { -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+  }
+  body { overscroll-behavior-y: none; }
+
+  /* 16 px minimum : iOS ne zoome plus à la prise de focus. */
+  input, textarea, select { font-size: 16px; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+@layer components {
+  /* Surface de carte unique de l'app (même recette que .mv-card). */
+  .k-card {
+    border-radius: 1.5rem;
+    border: 1px solid hsl(var(--foreground) / 0.07);
+    background: hsl(var(--card) / 0.92);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 8px 24px -14px rgb(0 0 0 / 0.14);
+  }
+  .k-input {
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card));
+    padding: 0.8rem 1rem;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .k-input:focus {
+    border-color: hsl(var(--tone));
+    box-shadow: 0 0 0 4px hsl(var(--tone) / 0.15);
+  }
+  .k-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
 }
 
-html, body {
-  height: 100%;
-  overflow: hidden;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-}
+@layer utilities {
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-/* Scrollbar hidden */
-::-webkit-scrollbar { width: 0; }
+  @keyframes k-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes k-pop {
+    0% { opacity: 0; transform: scale(0.6); }
+    60% { transform: scale(1.06); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes k-sheet {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes k-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes k-shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+  @keyframes k-wave {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
 
-/* Inputs */
-input, textarea, select {
-  width: 100%;
-  background: var(--card2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 10px;
-  padding: 11px 14px;
-  font-family: inherit;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-input:focus, textarea:focus, select:focus {
-  border-color: var(--green);
-}
-select option {
-  background: var(--card2);
-}
+  .k-enter { animation: k-up .38s cubic-bezier(.16, 1, .3, 1) both; }
+  .k-pop { animation: k-pop .3s cubic-bezier(.16, 1, .3, 1) both; }
+  .k-sheet { animation: k-sheet .32s cubic-bezier(.16, 1, .3, 1) both; }
+  .k-fade { animation: k-fade .2s ease both; }
+  .k-wave { animation: k-wave 5s linear infinite; }
+  .k-shimmer {
+    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--accent)) 50%, hsl(var(--muted)) 75%);
+    background-size: 200% 100%;
+    animation: k-shimmer 1.6s linear infinite;
+  }
+  .k-press { transition: transform .15s cubic-bezier(.16, 1, .3, 1), background-color .2s, box-shadow .2s; }
+  .k-press:active { transform: scale(.97); }
 
-/* Animations */
-@keyframes pulse-dot {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-  40% { transform: scale(1); opacity: 1; }
-}
-
-.font-display {
-  font-family: 'Outfit', sans-serif;
+  @media (prefers-reduced-motion: reduce) {
+    .k-enter, .k-pop, .k-sheet, .k-fade, .k-wave, .k-shimmer { animation: none !important; }
+    .k-press, .k-press:active { transition: none; transform: none; }
+  }
 }

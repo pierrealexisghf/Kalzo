@@ -8,18 +8,54 @@ const MAX_MESSAGES = 4
 const MAX_INPUT_CHARS = 8000
 const DAILY_CAP = 100
 
-function validate(body) {
-  if (!body || !Array.isArray(body.messages)) return 'Requête invalide.'
-  if (body.messages.length === 0 || body.messages.length > MAX_MESSAGES) return 'Requête invalide.'
-  let total = 0
-  for (const m of body.messages) {
-    if (!m || !['user', 'assistant'].includes(m.role) || typeof m.content !== 'string') {
-      return 'Requête invalide.'
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_IMAGE_B64_CHARS = 3_000_000 // ~2,2 Mo : le navigateur compresse avant envoi
+
+// Accepte du texte, ou une liste de blocs texte / image (une seule image).
+// Tout le reste est refusé : la route ne doit pas servir de passerelle libre.
+function cleanContent(content) {
+  if (typeof content === 'string') return { content, chars: content.length }
+  if (!Array.isArray(content) || content.length === 0 || content.length > 3) return null
+  let chars = 0
+  let images = 0
+  const out = []
+  for (const block of content) {
+    if (block?.type === 'text' && typeof block.text === 'string') {
+      chars += block.text.length
+      out.push({ type: 'text', text: block.text })
+    } else if (
+      block?.type === 'image' &&
+      block.source?.type === 'base64' &&
+      IMAGE_TYPES.includes(block.source.media_type) &&
+      typeof block.source.data === 'string' &&
+      block.source.data.length <= MAX_IMAGE_B64_CHARS
+    ) {
+      images += 1
+      out.push({
+        type: 'image',
+        source: { type: 'base64', media_type: block.source.media_type, data: block.source.data },
+      })
+    } else {
+      return null
     }
-    total += m.content.length
   }
-  if (total > MAX_INPUT_CHARS) return 'Votre demande est trop longue.'
-  return null
+  if (images > 1) return null
+  return { content: out, chars }
+}
+
+function validate(body) {
+  if (!body || !Array.isArray(body.messages)) return { error: 'Requête invalide.' }
+  if (body.messages.length === 0 || body.messages.length > MAX_MESSAGES) return { error: 'Requête invalide.' }
+  let total = 0
+  const messages = []
+  for (const m of body.messages) {
+    const cleaned = m && ['user', 'assistant'].includes(m.role) ? cleanContent(m.content) : null
+    if (!cleaned) return { error: 'Requête invalide.' }
+    total += cleaned.chars
+    messages.push({ role: m.role, content: cleaned.content })
+  }
+  if (total > MAX_INPUT_CHARS) return { error: 'Votre demande est trop longue.' }
+  return { messages }
 }
 
 export async function POST(request) {
@@ -32,8 +68,8 @@ export async function POST(request) {
   } catch {
     return jsonError('Requête invalide.', 400, 'bad_request')
   }
-  const invalid = validate(body)
-  if (invalid) return jsonError(invalid, 400, 'bad_request')
+  const checked = validate(body)
+  if (checked.error) return jsonError(checked.error, 400, 'bad_request')
 
   const maxTokens = Math.min(Math.max(parseInt(body.max_tokens) || 1000, 100), MAX_TOKENS_CAP)
   const admin = adminClient()
@@ -65,7 +101,7 @@ export async function POST(request) {
       body: JSON.stringify({
         model: MODEL,
         max_tokens: maxTokens,
-        messages: body.messages.map(m => ({ role: m.role, content: m.content })),
+        messages: checked.messages,
       }),
     })
     const data = await response.json()
