@@ -6,9 +6,10 @@ import { useApp } from '@/lib/AppContext'
 import { useNav } from '@/lib/nav'
 import {
   todayKey, addDays, relativeDay, dayTotals, MEAL_TYPES, mealTypeOf, weekDatesOf, shortDay,
-  formatDay, parseKey, fmtMl, sumMacros,
+  formatDay, parseKey, fmtMl, sumMacros, goalProgress, calculateProfile, nearestActivity,
 } from '@/lib/nutrition'
-import { Card, Segmented, SectionTitle, EmptyState, Button, Input, ProgressBar, MacroBar, cx } from '@/components/ui/primitives'
+import { Card, Segmented, SectionTitle, EmptyState, Button, Input, ProgressBar, MacroBar, ConfirmDialog, cx } from '@/components/ui/primitives'
+import WeightGoalSheet from '@/components/screens/WeightGoalSheet'
 
 const TABS = [{ id: 'day', label: 'Jour' }, { id: 'week', label: 'Semaine' }, { id: 'weight', label: 'Poids' }]
 
@@ -217,39 +218,52 @@ function WeekView() {
 }
 
 // --------------------------------------------------------------- Poids
-function WeightChart({ entries, target }) {
-  const pts = entries.slice(-30)
-  if (pts.length < 2) return null
-  const W = 320, H = 130, P = 14
-  const ws = pts.map(p => p.weight).concat(target ? [target] : [])
+// Courbe sur un axe de DATES : pesées réelles + trajectoire idéale en pointillé.
+function WeightChart({ entries, goal }) {
+  const pts = entries.slice(-60)
+  if (pts.length < 2 && !goal) return null
+  const W = 320, H = 150, P = 14
+  const dayNum = d => Math.round(parseKey(d).getTime() / 86400000)
+  const goalEnd = goal ? addDays(goal.startDate, (goal.weeks || 8) * 7) : null
+  const dates = [...pts.map(p => p.date), ...(goal ? [goal.startDate, goalEnd] : [])]
+  const x0 = Math.min(...dates.map(dayNum)), x1 = Math.max(...dates.map(dayNum), x0 + 1)
+  const ws = [...pts.map(p => p.weight), ...(goal ? [goal.targetWeight, goal.startWeight] : [])]
   const min = Math.min(...ws) - 1, max = Math.max(...ws) + 1
-  const x = i => P + (i / (pts.length - 1)) * (W - 2 * P)
+  const x = d => P + ((dayNum(d) - x0) / (x1 - x0)) * (W - 2 * P)
   const y = w => H - P - ((w - min) / (max - min)) * (H - 2 * P)
-  const d = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(p.weight).toFixed(1)}`).join(' ')
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.date).toFixed(1)} ${y(p.weight).toFixed(1)}`).join(' ')
+  const today = todayKey()
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-36 w-full" role="img" aria-label="Évolution du poids">
-      {target && <line x1={P} x2={W - P} y1={y(target)} y2={y(target)} className="stroke-tone/50" strokeDasharray="4 4" />}
-      <path d={`${d} L${x(pts.length - 1)} ${H - P} L${x(0)} ${H - P} Z`} className="fill-tone/10" />
-      <path d={d} fill="none" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="stroke-tone" />
-      {pts.map((p, i) => <circle key={p.date} cx={x(i)} cy={y(p.weight)} r={i === pts.length - 1 ? 5 : 3} className="fill-tone" />)}
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-40 w-full" role="img" aria-label="Évolution du poids">
+      {goal && <line x1={P} x2={W - P} y1={y(goal.targetWeight)} y2={y(goal.targetWeight)} className="stroke-tone/30" strokeDasharray="2 5" />}
+      {goal && <line x1={x(goal.startDate)} y1={y(goal.startWeight)} x2={x(goalEnd)} y2={y(goal.targetWeight)} className="stroke-tone/70" strokeWidth="2" strokeDasharray="6 5" />}
+      {goal && dayNum(today) >= x0 && dayNum(today) <= x1 && <line x1={x(today)} x2={x(today)} y1={P} y2={H - P} className="stroke-foreground/15" />}
+      {pts.length > 1 && <path d={line} fill="none" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="stroke-tone" />}
+      {pts.map((p, i) => <circle key={p.date} cx={x(p.date)} cy={y(p.weight)} r={i === pts.length - 1 ? 5 : 3} className="fill-tone" />)}
     </svg>
   )
 }
 
+const STATE_LABEL = {
+  reached: ['Objectif atteint 🎉', 'bg-nutri-soft text-nutri'],
+  ahead: ['En avance', 'bg-nutri-soft text-nutri'],
+  on_track: ['Dans les temps', 'bg-tone-soft text-tone'],
+  behind: ['En retard', 'bg-sport-soft text-sport'],
+}
+
 function WeightView() {
-  const { weightEntries, weightGoal, profile, addWeight, removeWeight, saveWeightGoal, showToast } = useApp()
+  const { weightEntries, weightGoal, profile, addWeight, removeWeight, saveWeightGoal, saveProfile, showToast } = useApp()
   const [value, setValue] = useState('')
-  const [goalValue, setGoalValue] = useState('')
-  const [editGoal, setEditGoal] = useState(false)
+  const [sheet, setSheet] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const entries = useMemo(() => [...(weightEntries || [])].sort((a, b) => a.date.localeCompare(b.date)), [weightEntries])
   const last = entries[entries.length - 1]
   const first = entries[0]
   const current = last?.weight ?? profile.weight
   const delta = last && first && entries.length > 1 ? last.weight - first.weight : 0
-  const target = weightGoal?.targetWeight
-  const start = weightGoal?.startWeight ?? first?.weight ?? current
-  const progress = target && start !== target ? Math.min(100, Math.max(0, ((start - current) / (start - target)) * 100)) : 0
   const Trend = delta < -0.05 ? TrendingDown : delta > 0.05 ? TrendingUp : Flat
+  const v2 = weightGoal?.v === 2
+  const prog = weightGoal ? goalProgress(weightGoal, entries, profile.weight) : null
 
   const save = async () => {
     const w = parseFloat(value.replace(',', '.'))
@@ -258,12 +272,14 @@ function WeightView() {
     setValue('')
     showToast('Pesée enregistrée', 'success')
   }
-  const saveGoal = async () => {
-    const g = parseFloat(goalValue.replace(',', '.'))
-    if (!g || g < 30 || g > 300) return showToast('Entrez un poids cible valide', 'error')
-    await saveWeightGoal({ targetWeight: g, weeks: weightGoal?.weeks || 8, startDate: todayKey(), startWeight: current })
-    setEditGoal(false); setGoalValue('')
-    showToast('Objectif enregistré', 'success')
+
+  const removeGoal = async () => {
+    setConfirmDelete(false)
+    await saveWeightGoal(null)
+    if (weightGoal?.adaptCalories) {
+      await saveProfile(calculateProfile({ ...profile, activity: nearestActivity(profile.activity), goal: 'maintenance' }))
+      showToast('Objectif supprimé, calories remises à l\'entretien', 'success')
+    } else showToast('Objectif supprimé', 'success')
   }
 
   return (
@@ -280,26 +296,35 @@ function WeightView() {
             </div>
           )}
         </div>
-        <WeightChart entries={entries} target={target} />
+        <WeightChart entries={entries} goal={v2 ? weightGoal : null} />
         {entries.length < 2 && <p className="mt-3 text-[13px] text-muted-foreground">Ajoutez au moins deux pesées pour voir la courbe.</p>}
+        {v2 && <p className="mt-1 flex items-center gap-4 text-[11px] text-muted-foreground"><span className="flex items-center gap-1.5"><span className="h-0.5 w-4 rounded bg-tone" />Vos pesées</span><span className="flex items-center gap-1.5"><span className="h-0.5 w-4 border-t-2 border-dashed border-tone" />Trajectoire visée</span></p>}
       </Card>
 
       <Card className="p-4">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-[15px] font-bold"><Target className="size-[18px] text-tone" />Objectif</span>
-          <button onClick={() => setEditGoal(e => !e)} className="text-[13px] font-bold text-primary">{target ? 'Modifier' : 'Définir'}</button>
+          <button onClick={() => setSheet(true)} className="text-[13px] font-bold text-primary">{weightGoal ? 'Modifier' : 'Définir'}</button>
         </div>
-        {target && !editGoal && (
+
+        {!weightGoal && <p className="mt-2 text-[13px] text-muted-foreground">Choisissez un poids cible et une échéance : l'app calcule votre rythme et suit votre avancée.</p>}
+
+        {prog && (
           <div className="mt-3">
-            <div className="mb-1.5 flex justify-between text-xs font-semibold text-muted-foreground"><span>{start} kg</span><span>{target} kg</span></div>
-            <ProgressBar value={progress} max={100} height="h-3" />
-            <p className="mt-2 text-[13px] text-muted-foreground">{Math.abs(current - target).toFixed(1)} kg {current > target ? 'à perdre' : current < target ? 'à prendre' : '— objectif atteint !'}</p>
-          </div>
-        )}
-        {(editGoal || !target) && (
-          <div className="mt-3 flex gap-2.5">
-            <Input type="text" inputMode="decimal" placeholder="Poids cible (kg)" value={goalValue} onChange={e => setGoalValue(e.target.value)} />
-            <Button variant="tone" onClick={saveGoal} disabled={!goalValue}>OK</Button>
+            {v2 && <span className={cx('mb-3 inline-block rounded-full px-3 py-1 text-xs font-bold', STATE_LABEL[prog.state][1])}>
+              {STATE_LABEL[prog.state][0]}{prog.state === 'ahead' || prog.state === 'behind' ? ` · ${Math.abs(prog.ahead).toFixed(1).replace('.', ',')} kg` : ''}
+            </span>}
+            <div className="mb-1.5 flex justify-between text-xs font-semibold text-muted-foreground"><span>{prog.start} kg</span><span>{prog.target} kg</span></div>
+            <ProgressBar value={prog.pct} max={100} height="h-3" />
+            <p className="mt-2 text-[13px] text-muted-foreground">
+              {prog.state === 'reached' ? 'Vous avez atteint votre poids cible.' : `${Math.abs(prog.current - prog.target).toFixed(1).replace('.', ',')} kg ${prog.losing ? 'à perdre' : 'à prendre'}`}
+              {v2 && prog.state !== 'reached' && <> · échéance le {formatDay(prog.endDate, false)} ({prog.weeksLeft} sem.)</>}
+            </p>
+            {v2 && prog.daysSinceWeigh != null && prog.daysSinceWeigh >= 10 && prog.state !== 'reached' && <p className="mt-2 text-[13px] font-medium text-tone">Dernière pesée il y a {prog.daysSinceWeigh} jours : pesez-vous pour mettre le suivi à jour.</p>}
+            {!v2 && <button onClick={() => setSheet(true)} className="mt-3 text-[13px] font-bold text-primary">Ajouter une échéance</button>}
+            {v2 && weightGoal.adaptCalories && <p className="mt-2 text-xs text-muted-foreground">Vos calories sont ajustées à cet objectif ({profile.kcal} kcal/jour).</p>}
+            {prog.state === 'reached' && <Button variant="tone" full className="mt-3" onClick={() => setSheet(true)}>Définir un nouvel objectif</Button>}
+            <button onClick={() => setConfirmDelete(true)} className="mt-3 text-xs font-semibold text-muted-foreground underline">Supprimer l'objectif</button>
           </div>
         )}
       </Card>
@@ -328,6 +353,11 @@ function WeightView() {
           </ul>
         </Card>
       )}
+
+      {sheet && <WeightGoalSheet open onClose={() => setSheet(false)} current={current} existing={weightGoal} />}
+      <ConfirmDialog open={confirmDelete} title="Supprimer l'objectif ?" confirmLabel="Supprimer" danger
+        text={weightGoal?.adaptCalories ? "Vos calories seront remises à l'entretien. Vos pesées sont conservées." : 'Vos pesées sont conservées.'}
+        onCancel={() => setConfirmDelete(false)} onConfirm={removeGoal} />
     </div>
   )
 }

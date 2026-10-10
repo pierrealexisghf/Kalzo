@@ -29,6 +29,6 @@ export function demoData() {
   return {
     profile: { weight: 72.6, height: 172, age: 31, gender: 'female', activity: 1.55, goal: 'seche', kcal: 1950, prot: 145, lip: 58, gluc: 215 },
     dailyMeals, dailySport, dailyWater, weightEntries,
-    weightGoal: { targetWeight: 68, weeks: 12, startDate: addDays(today, -30), startWeight: 74.2 },
+    weightGoal: { v: 2, targetWeight: 68, weeks: 12, startDate: addDays(today, -30), startWeight: 74.2, adaptCalories: true, dailyDelta: -420 },
   }
 }

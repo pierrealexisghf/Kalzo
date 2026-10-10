@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronLeft, X, Loader2 } from 'lucide-react'
 
 export const cx = (...c) => c.filter(Boolean).join(' ')
@@ -184,8 +185,10 @@ export function Sheet({ open, onClose, title, children }) {
   }, [open, onClose])
 
   if (!open) return null
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
+  // Rendu dans <body> : un parent animé (transform) ferait de lui le repère du
+  // "fixed", et la barre de navigation passerait par-dessus la feuille.
+  return createPortal(
+    <div className="fixed inset-0 z-[55] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
       <div className="k-fade absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={onClose} />
       <div className="k-sheet relative flex max-h-[90dvh] w-full max-w-lg flex-col rounded-t-[2rem] bg-background shadow-float">
         <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-border" />
@@ -197,14 +200,15 @@ export function Sheet({ open, onClose, title, children }) {
         </div>
         <div className="safe-bottom overflow-y-auto px-5 pb-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
 // Boîte de confirmation (remplace window.confirm).
 export function ConfirmDialog({ open, title, text, extra, confirmLabel = 'Confirmer', danger, onConfirm, onCancel }) {
   if (!open) return null
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-6" role="alertdialog" aria-modal="true">
       <div className="k-fade absolute inset-0 bg-black/45" onClick={onCancel} />
       <div className="k-pop relative w-full max-w-sm rounded-[1.75rem] bg-background p-6 shadow-float">
@@ -218,7 +222,8 @@ export function ConfirmDialog({ open, title, text, extra, confirmLabel = 'Confir
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

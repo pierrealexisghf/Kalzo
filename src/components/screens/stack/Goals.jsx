@@ -10,7 +10,7 @@ import { Button, Card, Field, Input, ScreenHeader, SectionTitle, Segmented, Macr
 const ICONS = { seche: Flame, maintenance: Scale, masse: Dumbbell }
 
 export default function Goals() {
-  const { profile, saveProfile, waterGoal, setWaterGoal, showToast } = useApp()
+  const { profile, saveProfile, waterGoal, setWaterGoal, weightGoal, showToast } = useApp()
   const { back } = useNav()
   const [f, setF] = useState({
     goal: profile.goal || 'maintenance', gender: profile.gender || 'female', age: String(profile.age || ''),
@@ -19,7 +19,10 @@ export default function Goals() {
   const [water, setWater] = useState(String(waterGoal))
   const set = (k, v) => setF(s => ({ ...s, [k]: v }))
   const valid = f.age >= 15 && f.age <= 100 && f.height >= 120 && f.height <= 230 && f.weight >= 30 && f.weight <= 300
-  const preview = valid ? calculateProfile(f) : null
+  // Si un objectif de poids pilote les calories, la cible reste celle de l'échéance choisie.
+  const adaptive = weightGoal?.v === 2 && weightGoal.adaptCalories
+  const override = adaptive && valid ? calculateProfile({ ...f, goal: 'maintenance' }).tdee + (weightGoal.dailyDelta || 0) : undefined
+  const preview = valid ? calculateProfile({ ...f, kcalOverride: override }) : null
   const minor = Number(f.age) > 0 && Number(f.age) < 18
 
   const save = async () => {
@@ -34,6 +37,13 @@ export default function Goals() {
     <div className="tone-nutri">
       <ScreenHeader title="Mes objectifs" subtitle="Calculés à partir de votre profil" onBack={back} />
 
+      {adaptive ? (
+        <div className="tone-weight flex gap-3 rounded-3xl bg-tone-soft p-4 text-[13px] leading-snug">
+          <Info className="mt-0.5 size-4 shrink-0 text-tone" />
+          <span>Vos calories suivent votre <strong>objectif de poids</strong> ({weightGoal.targetWeight} kg en {weightGoal.weeks} semaines). Pour les modifier, changez l'objectif dans Journal → Poids.</span>
+        </div>
+      ) : (
+        <>
       <SectionTitle className="!mt-0">Objectif</SectionTitle>
       <div className="space-y-2.5">
         {GOALS.map(g => {
@@ -49,6 +59,9 @@ export default function Goals() {
         })}
       </div>
       {minor && f.goal === 'seche' && <div className="mt-3 flex gap-2.5 rounded-2xl bg-sport-soft p-3.5 text-[13px] text-sport"><Info className="mt-0.5 size-4 shrink-0" />Avant 18 ans, aucun déficit calorique n'est proposé.</div>}
+
+        </>
+      )}
 
       <SectionTitle>Profil</SectionTitle>
       <Card className="space-y-4 p-5">

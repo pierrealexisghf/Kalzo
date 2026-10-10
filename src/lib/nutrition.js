@@ -124,7 +124,7 @@ export function mealTypeOf(meal) {
 
 // Mifflin-St Jeor (plus fiable que Harris-Benedict), avec garde-fous de sécurité :
 // jamais sous un plancher calorique.
-export function calculateProfile({ weight, height, age, gender, activity, goal }) {
+export function calculateProfile({ weight, height, age, gender, activity, goal, kcalOverride }) {
   weight = Number(weight); height = Number(height); age = Number(age)
   const factor = Number(activity)
   const bmr = 10 * weight + 6.25 * height - 5 * age + (gender === 'male' ? 5 : -161)
@@ -132,7 +132,8 @@ export function calculateProfile({ weight, height, age, gender, activity, goal }
   let modifier = GOALS.find(g => g.id === goal)?.modifier ?? 0
   if (age < 18 && modifier < 0) modifier = 0 // jamais de déficit calorique pour un mineur
   const floor = gender === 'male' ? 1500 : 1200
-  const kcal = Math.max(floor, tdee + modifier)
+  let kcal = Math.max(floor, tdee + modifier)
+  if (kcalOverride != null) kcal = Math.max(floor, Math.round(kcalOverride)) // cible issue d'un objectif de poids
 
   const protPerKg = goal === 'seche' ? 2.0 : goal === 'masse' ? 1.8 : 1.6
   const prot = Math.round(weight * protPerKg)
@@ -140,6 +141,75 @@ export function calculateProfile({ weight, height, age, gender, activity, goal }
   const gluc = Math.max(0, Math.round((kcal - prot * 4 - lip * 9) / 4))
 
   return { weight, height, age, gender, activity: factor, goal, kcal, tdee, prot, lip, gluc }
+}
+
+// ---------------------------------------------------------------------------
+// Objectif de poids avec échéance
+// ---------------------------------------------------------------------------
+export const KCAL_PER_KG = 7700 // ordre de grandeur énergétique d'un kg de masse corporelle
+export const GOAL_DURATIONS = [4, 8, 12, 16, 24]
+
+// Calcule le rythme, la date d'arrivée et (si on adapte les calories) la cible
+// journalière pour passer de `current` à `target` en `weeks` semaines.
+// status : ok | too_fast | floor | minor | invalid
+//  - too_fast : rythme au-dessus du plafond de sécurité (≈ 1 % du poids/sem. en perte, 0,5 kg/sem. en prise)
+//  - floor    : l'échéance imposerait de passer sous le plancher calorique
+//  - minor    : pas d'objectif de perte de poids avant 18 ans
+export function planWeightGoal({ current, target, weeks, gender, age, activity, height, startDate = todayKey() }) {
+  const cur = Number(current), tgt = Number(target), w = Math.round(Number(weeks))
+  if (!(cur > 0) || !(tgt > 0) || !(w >= 1)) return { status: 'invalid' }
+  const delta = tgt - cur
+  const direction = Math.abs(delta) < 0.1 ? 'maintenance' : delta < 0 ? 'seche' : 'masse'
+  const end = addDays(startDate, w * 7)
+  if (direction === 'maintenance') return { status: 'ok', direction, delta: 0, weeks: w, weeklyRate: 0, dailyDelta: 0, end }
+  if (direction === 'seche' && Number(age) < 18) return { status: 'minor', direction }
+
+  const abs = Math.abs(delta)
+  const weeklyRate = abs / w
+  const maxRate = direction === 'seche' ? Math.min(cur * 0.01, 1) : 0.5
+  const minWeeks = Math.ceil(abs / maxRate)
+
+  const base = calculateProfile({ weight: cur, height, age, gender, activity, goal: 'maintenance' })
+  const floor = gender === 'male' ? 1500 : 1200
+  const sign = direction === 'seche' ? -1 : 1
+  const dailyDelta = Math.round(((weeklyRate * KCAL_PER_KG) / 7) * sign)
+  const rawKcal = base.tdee + dailyDelta
+
+  // Durée minimale pour respecter le plancher calorique (perte uniquement).
+  const maxDeficit = Math.max(0, base.tdee - floor)
+  const weeksForFloor = direction === 'seche' ? (maxDeficit > 0 ? Math.ceil((abs * KCAL_PER_KG) / (maxDeficit * 7)) : null) : 0
+
+  let status = 'ok'
+  if (weeklyRate > maxRate + 1e-9) status = 'too_fast'
+  else if (rawKcal < floor) status = 'floor'
+
+  return {
+    status, direction, delta, weeks: w, weeklyRate, maxRate, dailyDelta, end,
+    tdee: base.tdee, kcalTarget: Math.max(floor, rawKcal),
+    suggestWeeks: weeksForFloor == null ? null : Math.max(minWeeks, weeksForFloor),
+  }
+}
+
+// Où en est-on par rapport à la trajectoire idéale (ligne droite départ → cible) ?
+export function goalProgress(goal, entries, fallbackWeight) {
+  const sorted = [...(entries || [])].sort((a, b) => a.date.localeCompare(b.date))
+  const last = sorted[sorted.length - 1]
+  const current = last?.weight ?? fallbackWeight
+  const start = goal.startWeight ?? current
+  const target = goal.targetWeight
+  const total = Math.max(1, (goal.weeks || 8) * 7)
+  const endDate = addDays(goal.startDate || todayKey(), total)
+  const elapsed = Math.min(total, Math.max(0, Math.round((parseKey(todayKey()) - parseKey(goal.startDate || todayKey())) / 86400000)))
+  const ideal = start + (target - start) * (elapsed / total)
+  const diff = current - ideal // négatif = plus léger que prévu
+  const losing = target < start
+  const ahead = losing ? -diff : diff // >0 = en avance
+  const daysLeft = Math.max(0, total - elapsed)
+  const pct = start === target ? 100 : Math.min(100, Math.max(0, ((start - current) / (start - target)) * 100))
+  const reached = losing ? current <= target + 0.05 : current >= target - 0.05
+  const state = reached ? 'reached' : ahead > 0.3 ? 'ahead' : ahead < -0.3 ? 'behind' : 'on_track'
+  const daysSinceWeigh = last ? Math.round((parseKey(todayKey()) - parseKey(last.date)) / 86400000) : null
+  return { current, start, target, ideal, diff, ahead, state, pct, endDate, daysLeft, weeksLeft: Math.ceil(daysLeft / 7), daysSinceWeigh, losing }
 }
 
 // ~35 ml par kg, arrondi aux 250 ml, entre 1,5 et 4 L.
