@@ -87,13 +87,21 @@ export const GOALS = [
   { id: 'masse', label: 'Prendre de la masse', short: 'Prise de masse', desc: 'Surplus léger (+300 kcal/jour)', modifier: 300 },
 ]
 
+// Niveau d'activité du QUOTIDIEN, sport exclu : les séances saisies dans l'app
+// sont ajoutées à part (« calories brûlées »). Compter le sport ici ET le saisir
+// reviendrait à le compter deux fois.
 export const ACTIVITY_LEVELS = [
-  { value: 1.2, label: 'Sédentaire', desc: 'Peu ou pas de sport' },
-  { value: 1.375, label: 'Légèrement actif', desc: '1 à 3 séances par semaine' },
-  { value: 1.55, label: 'Modérément actif', desc: '3 à 5 séances par semaine' },
-  { value: 1.725, label: 'Très actif', desc: '6 à 7 séances par semaine' },
-  { value: 1.9, label: 'Extrêmement actif', desc: 'Entraînement intensif / métier physique' },
+  { value: 1.2, label: 'Plutôt assis', desc: 'Bureau, études, télétravail, peu de déplacements' },
+  { value: 1.3, label: 'Souvent debout', desc: 'Commerce, enseignement, parent actif, beaucoup de marche' },
+  { value: 1.4, label: 'Travail physique', desc: 'Manutention, chantier, soins, agriculture' },
 ]
+
+// Les profils créés avant ce changement ont un ancien coefficient (1,375 à 1,9) :
+// on les rattache au niveau le plus proche pour l'affichage.
+export function nearestActivity(value) {
+  const v = Number(value) || 1.3
+  return ACTIVITY_LEVELS.reduce((best, l) => (Math.abs(l.value - v) < Math.abs(best.value - v) ? l : best)).value
+}
 
 export const MEAL_TYPES = [
   { id: 'petit-dejeuner', label: 'Petit-déjeuner', emoji: '🥐' },

@@ -41,7 +41,7 @@ export default function Onboarding() {
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
   const [name, setName] = useState(user?.user_metadata?.first_name || '')
-  const [form, setForm] = useState({ goal: 'maintenance', gender: 'female', age: '', height: '', weight: '', activity: 1.375 })
+  const [form, setForm] = useState({ goal: 'maintenance', gender: 'female', age: '', height: '', weight: '', activity: 1.3 })
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const age = Number(form.age)
@@ -81,7 +81,7 @@ export default function Onboarding() {
   const head = {
     goal: { t: `Bienvenue${firstName ? `, ${firstName}` : ''} !`, s: "Quel est votre objectif ? Vous pourrez le changer à tout moment." },
     body: { t: 'Parlons de vous', s: 'Ces informations servent uniquement à calculer vos besoins quotidiens.' },
-    activity: { t: "Votre niveau d'activité", s: 'Au quotidien, en dehors des séances de sport ponctuelles.' },
+    activity: { t: 'Votre quotidien', s: 'Sans compter le sport : vos séances, vous les ajouterez ensuite et leurs calories seront comptées en plus.' },
     result: { t: 'Votre plan est prêt', s: 'Voici vos objectifs journaliers, calculés pour vous.' },
   }[current]
 

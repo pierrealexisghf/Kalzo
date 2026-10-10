@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Check, Droplets, Flame, Scale, Dumbbell, Info } from 'lucide-react'
 import { useApp } from '@/lib/AppContext'
 import { useNav } from '@/lib/nav'
-import { GOALS, ACTIVITY_LEVELS, calculateProfile, suggestWaterGoal, fmtMl } from '@/lib/nutrition'
+import { GOALS, ACTIVITY_LEVELS, nearestActivity, calculateProfile, suggestWaterGoal, fmtMl } from '@/lib/nutrition'
 import { Button, Card, Field, Input, ScreenHeader, SectionTitle, Segmented, MacroBar, cx } from '@/components/ui/primitives'
 
 const ICONS = { seche: Flame, maintenance: Scale, masse: Dumbbell }
@@ -14,7 +14,7 @@ export default function Goals() {
   const { back } = useNav()
   const [f, setF] = useState({
     goal: profile.goal || 'maintenance', gender: profile.gender || 'female', age: String(profile.age || ''),
-    height: String(profile.height || ''), weight: String(profile.weight || ''), activity: Number(profile.activity) || 1.375,
+    height: String(profile.height || ''), weight: String(profile.weight || ''), activity: nearestActivity(profile.activity),
   })
   const [water, setWater] = useState(String(waterGoal))
   const set = (k, v) => setF(s => ({ ...s, [k]: v }))
@@ -60,7 +60,7 @@ export default function Goals() {
         </div>
       </Card>
 
-      <SectionTitle>Niveau d'activité</SectionTitle>
+      <SectionTitle>Votre quotidien (hors sport)</SectionTitle>
       <div className="space-y-2">
         {ACTIVITY_LEVELS.map(a => (
           <button key={a.value} onClick={() => set('activity', a.value)} className={cx('k-press k-card flex w-full items-center justify-between p-3.5 text-left', f.activity === a.value && '!border-tone bg-tone-soft ring-2 ring-tone/25')}>
@@ -69,6 +69,7 @@ export default function Goals() {
           </button>
         ))}
       </div>
+      <p className="mt-2.5 px-1 text-xs text-muted-foreground">Le sport n'est pas compris ici : ajoutez vos séances dans l'app, leurs calories s'ajoutent à votre budget du jour.</p>
 
       <SectionTitle>Hydratation</SectionTitle>
       <Card className="tone-water p-5">
