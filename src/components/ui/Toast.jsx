@@ -1,31 +1,36 @@
 'use client'
 
+import { CheckCircle2, AlertCircle, Info } from 'lucide-react'
 import { useApp } from '@/lib/AppContext'
 
-export default function Toast() {
-  const { toast } = useApp()
+const STYLES = {
+  success: { icon: CheckCircle2, cls: 'text-nutri' },
+  error: { icon: AlertCircle, cls: 'text-destructive' },
+  info: { icon: Info, cls: 'text-water' },
+}
 
+export default function Toast() {
+  const { toasts, dismissToast } = useApp()
+  if (!toasts.length) return null
   return (
     <div
-      style={{
-        position: 'fixed',
-        top: 20,
-        left: '50%',
-        transform: `translateX(-50%) translateY(${toast ? '0' : '-80px'})`,
-        background: 'var(--card)',
-        border: '1px solid var(--border)',
-        borderRadius: 12,
-        padding: '10px 18px',
-        fontSize: 13,
-        fontWeight: 600,
-        zIndex: 500,
-        transition: 'transform 0.3s',
-        whiteSpace: 'nowrap',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-        pointerEvents: 'none',
-      }}
+      className="pointer-events-none fixed inset-x-0 top-0 z-[70] flex flex-col items-center gap-2 px-4 safe-top"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}
+      role="status" aria-live="polite"
     >
-      {toast}
+      {toasts.map(t => {
+        const { icon: Icon, cls } = STYLES[t.type] || STYLES.info
+        return (
+          <button
+            key={t.id}
+            onClick={() => dismissToast(t.id)}
+            className="k-pop pointer-events-auto flex max-w-sm items-center gap-2.5 rounded-2xl border border-border bg-card px-4 py-3 text-left text-sm font-medium shadow-float"
+          >
+            <Icon className={`size-5 shrink-0 ${cls}`} />
+            <span>{t.message}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }
