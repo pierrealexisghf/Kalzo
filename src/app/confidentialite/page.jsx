@@ -71,7 +71,7 @@ export default function Confidentialite() {
       <Table
         head={['Prestataire', 'Rôle', 'Localisation']}
         rows={[
-          ['Supabase', 'Base de données et authentification (dont e-mails de confirmation)', 'Europe'],
+          ['Supabase', 'Base de données et authentification (dont e-mails de confirmation)', 'Irlande, Union européenne'],
           ['Vercel', 'Hébergement de l’application', 'Société de droit américain'],
           ['Anthropic', 'Traitement des demandes d’IA. Selon ses conditions commerciales, les données de l’API ne servent pas à entraîner ses modèles', 'États-Unis'],
           ['Stripe', 'Paiement des abonnements', 'Irlande et États-Unis'],
