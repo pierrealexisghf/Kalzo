@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useApp } from '@/lib/AppContext'
 import { supabase } from '@/lib/supabase'
 import { todayKey, getTodayWater, getTodayBurnedKcal } from '@/lib/nutrition'
+import { aiFetch } from '@/lib/ai'
 
 const TABS = [
   { id: 'eau', label: '💧 Eau' },
@@ -135,7 +136,7 @@ function SportTab() {
     setIaResult(null)
     try {
       const weight = profile?.weight || 75
-      const res = await fetch('/api/claude', {
+      const res = await aiFetch({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -196,8 +197,6 @@ Calcule précisément les calories brûlées. Réponds UNIQUEMENT en JSON valide
 
   const handleAdd = async () => {
     if (!name || !kcal) return showToast('⚠️ Remplissez au moins le nom et les calories')
-    const ok = await debitCredit()
-    if (!ok) return
     await addSport({ name, kcal: parseInt(kcal), duration: parseInt(duration) || 0, emoji: '🏃' })
     showToast('✅ Activité ajoutée')
     setName(''); setKcal(''); setDuration('')
@@ -298,8 +297,6 @@ Calcule précisément les calories brûlées. Réponds UNIQUEMENT en JSON valide
         {quickSports.map(s => (
           <button key={s.name} onClick={async () => {
             const dur = 30
-            const ok = await debitCredit()
-            if (!ok) return
             await addSport({ name: s.name, kcal: s.kcalPerMin * dur, duration: dur, emoji: s.emoji })
             showToast(`✅ ${s.name} (30min) ajouté`)
           }} style={{

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useApp } from '@/lib/AppContext'
+import { aiFetch } from '@/lib/ai'
 
 export default function Restaurant({ onNavigate }) {
   const { debitCredit, addMeal, showToast } = useApp()
@@ -30,7 +31,7 @@ export default function Restaurant({ onNavigate }) {
     setResult(null)
 
     try {
-      const res = await fetch('/api/claude', {
+      const res = await aiFetch({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

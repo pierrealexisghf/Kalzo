@@ -1,118 +1,137 @@
 import crypto from 'crypto'
+import { adminClient } from '@/lib/server/supabase-admin'
+import { PLANS, planFromPriceId } from '@/lib/constants'
 
-const SUPABASE_URL = 'https://yqvyguyxjnktajbnmavw.supabase.co'
-const PRICE_STANDARD = 'price_1Tc6S51JEMfMTdulDYObGtXg'
-const PRICE_VIP = 'price_1Tc6Sf1JEMfMTdulDT6umOCm'
-const CREDITS_STANDARD = 120
+const TOLERANCE_SECONDS = 5 * 60
 
-function verifyStripeSignature(payload, signature, secret) {
-  const elements = signature.split(',')
-  const timestamp = elements.find(e => e.startsWith('t=')).split('=')[1]
-  const sig = elements.find(e => e.startsWith('v1=')).split('=')[1]
-  const signedPayload = `${timestamp}.${payload}`
-  const expected = crypto.createHmac('sha256', secret).update(signedPayload).digest('hex')
-  return crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expected, 'hex'))
+function verifyStripeSignature(payload, header, secret) {
+  if (!header || !secret) return false
+  const parts = Object.fromEntries(
+    header.split(',').map(p => {
+      const i = p.indexOf('=')
+      return [p.slice(0, i), p.slice(i + 1)]
+    })
+  )
+  if (!parts.t || !parts.v1) return false
+  // Refuse les requêtes trop anciennes (rejeu d'un appel intercepté).
+  if (Math.abs(Date.now() / 1000 - Number(parts.t)) > TOLERANCE_SECONDS) return false
+  const expected = crypto.createHmac('sha256', secret).update(`${parts.t}.${payload}`).digest('hex')
+  const a = Buffer.from(parts.v1, 'hex')
+  const b = Buffer.from(expected, 'hex')
+  return a.length === b.length && crypto.timingSafeEqual(a, b)
 }
 
-function getPlanFromPriceId(priceId) {
-  if (priceId === PRICE_VIP) return 'vip'
-  if (priceId === PRICE_STANDARD) return 'standard'
-  return 'free'
-}
-
-async function updateProfile(userId, data) {
-  const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_KEY
-  await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
-    method: 'PATCH',
-    headers: {
-      'apikey': SUPABASE_SERVICE,
-      'Authorization': `Bearer ${SUPABASE_SERVICE}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
+async function stripeGet(path) {
+  const res = await fetch(`https://api.stripe.com/v1${path}`, {
+    headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
   })
+  const data = await res.json()
+  if (data.error) throw new Error(data.error.message)
+  return data
 }
 
-async function updateCredits(userId, plan) {
-  const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_KEY
-  const newBalance = plan === 'vip' ? 999999 : plan === 'free' ? 0 : CREDITS_STANDARD
-  // Upsert plutôt qu'un PATCH conditionnel : un tout nouvel abonné n'a pas
-  // encore de ligne credits, et un PATCH sur une ligne inexistante ne fait rien.
-  await fetch(`${SUPABASE_URL}/rest/v1/credits?on_conflict=user_id`, {
-    method: 'POST',
-    headers: {
-      'apikey': SUPABASE_SERVICE,
-      'Authorization': `Bearer ${SUPABASE_SERVICE}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates',
-    },
-    body: JSON.stringify({ user_id: userId, balance: newBalance, updated_at: new Date().toISOString() }),
+const iso = seconds => (seconds ? new Date(seconds * 1000).toISOString() : null)
+
+async function updateProfile(admin, userId, data) {
+  const { error } = await admin.from('profiles').update(data).eq('id', userId)
+  if (error) throw new Error(`profiles: ${error.message}`)
+}
+
+async function setCredits(admin, userId, plan) {
+  const balance = plan === 'free' ? 0 : PLANS[plan].credits
+  const { error } = await admin
+    .from('credits')
+    .upsert({ user_id: userId, balance, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+  if (error) throw new Error(`credits: ${error.message}`)
+}
+
+async function recordTransaction(admin, userId, invoice, plan) {
+  if (!invoice.amount_paid) return // facture d'essai à 0 €
+  const { data: existing } = await admin
+    .from('transactions')
+    .select('id')
+    .eq('stripe_payment_id', invoice.id)
+    .maybeSingle()
+  if (existing) return
+  const { error } = await admin.from('transactions').insert({
+    user_id: userId,
+    amount_euros: invoice.amount_paid / 100,
+    credits_added: plan === 'free' ? 0 : PLANS[plan].credits,
+    stripe_payment_id: invoice.id,
   })
+  if (error) throw new Error(`transactions: ${error.message}`)
 }
 
 export async function POST(request) {
   const rawBody = await request.text()
-  const signature = request.headers.get('stripe-signature')
-
-  try {
-    if (!verifyStripeSignature(rawBody, signature, process.env.STRIPE_WEBHOOK_SECRET)) {
-      return Response.json({ error: 'Invalid signature' }, { status: 400 })
-    }
-  } catch {
-    return Response.json({ error: 'Signature error' }, { status: 400 })
+  if (!verifyStripeSignature(rawBody, request.headers.get('stripe-signature'), process.env.STRIPE_WEBHOOK_SECRET)) {
+    return Response.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
   const event = JSON.parse(rawBody)
   const obj = event.data.object
+  const admin = adminClient()
 
-  switch (event.type) {
-    case 'checkout.session.completed': {
-      if (obj.mode !== 'subscription') break
-      const userId = obj.metadata?.user_id
-      const plan = obj.metadata?.plan
-      if (!userId || !plan) break
-      const trialEnd = obj.subscription_data?.trial_end
-        ? new Date(obj.subscription_data.trial_end * 1000).toISOString()
-        : null
-      await updateProfile(userId, {
-        plan, subscription_id: obj.subscription,
-        subscription_status: trialEnd ? 'trialing' : 'active',
-        trial_ends_at: trialEnd, current_period_end: null,
-      })
-      await updateCredits(userId, plan)
-      break
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        if (obj.mode !== 'subscription') break
+        const userId = obj.metadata?.user_id
+        const plan = obj.metadata?.plan
+        if (!userId || !PLANS[plan]) break
+        // Le vrai statut (essai ou actif) se lit sur l'abonnement, pas sur la session.
+        const sub = await stripeGet(`/subscriptions/${obj.subscription}`)
+        await updateProfile(admin, userId, {
+          plan,
+          subscription_id: obj.subscription,
+          subscription_status: sub.status === 'trialing' ? 'trialing' : 'active',
+          trial_ends_at: iso(sub.trial_end),
+          current_period_end: iso(sub.current_period_end),
+        })
+        await setCredits(admin, userId, plan)
+        break
+      }
+      case 'invoice.payment_succeeded': {
+        const priceId = obj.lines?.data?.[0]?.price?.id
+        const userId = obj.subscription_details?.metadata?.user_id || obj.metadata?.user_id
+        if (!userId || !priceId) break
+        const plan = planFromPriceId(priceId)
+        if (plan === 'free') break
+        await updateProfile(admin, userId, {
+          plan,
+          subscription_id: obj.subscription,
+          subscription_status: 'active',
+          current_period_end: iso(obj.lines?.data?.[0]?.period?.end),
+          trial_ends_at: null,
+        })
+        await setCredits(admin, userId, plan)
+        await recordTransaction(admin, userId, obj, plan)
+        break
+      }
+      case 'invoice.payment_failed': {
+        const userId = obj.subscription_details?.metadata?.user_id || obj.metadata?.user_id
+        if (!userId) break
+        await updateProfile(admin, userId, { subscription_status: 'past_due' })
+        break
+      }
+      case 'customer.subscription.deleted': {
+        const userId = obj.metadata?.user_id
+        if (!userId) break
+        await updateProfile(admin, userId, {
+          plan: 'free',
+          subscription_id: null,
+          subscription_status: 'inactive',
+          current_period_end: null,
+          trial_ends_at: null,
+        })
+        await setCredits(admin, userId, 'free')
+        break
+      }
     }
-    case 'invoice.payment_succeeded': {
-      const subId = obj.subscription
-      const priceId = obj.lines?.data?.[0]?.price?.id
-      const userId = obj.subscription_details?.metadata?.user_id || obj.metadata?.user_id
-      if (!userId || !priceId) break
-      const plan = getPlanFromPriceId(priceId)
-      const periodEnd = obj.lines?.data?.[0]?.period?.end
-        ? new Date(obj.lines.data[0].period.end * 1000).toISOString() : null
-      await updateProfile(userId, {
-        plan, subscription_id: subId, subscription_status: 'active',
-        current_period_end: periodEnd, trial_ends_at: null,
-      })
-      await updateCredits(userId, plan)
-      break
-    }
-    case 'invoice.payment_failed': {
-      const userId = obj.subscription_details?.metadata?.user_id || obj.metadata?.user_id
-      if (!userId) break
-      await updateProfile(userId, { subscription_status: 'past_due' })
-      break
-    }
-    case 'customer.subscription.deleted': {
-      const userId = obj.metadata?.user_id
-      if (!userId) break
-      await updateProfile(userId, {
-        plan: 'free', subscription_id: null, subscription_status: 'inactive',
-        current_period_end: null, trial_ends_at: null,
-      })
-      await updateCredits(userId, 'free')
-      break
-    }
+  } catch (err) {
+    // Réponse en erreur => Stripe réessaie automatiquement plus tard.
+    console.error('[stripe-webhook]', event.type, err.message)
+    return Response.json({ error: 'Processing failed' }, { status: 500 })
   }
 
   return Response.json({ received: true })

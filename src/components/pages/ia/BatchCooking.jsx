@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useApp } from '@/lib/AppContext'
+import { aiFetch } from '@/lib/ai'
 
 export default function BatchCooking({ onNavigate }) {
   const { debitCredit, showToast, profile } = useApp()
@@ -20,7 +21,7 @@ export default function BatchCooking({ onNavigate }) {
     try {
       const goal = profile?.goal || 'maintenance'
       const kcal = profile?.kcal || 2000
-      const res = await fetch('/api/claude', {
+      const res = await aiFetch({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

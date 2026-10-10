@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { supabase } from './supabase'
 import { todayKey, weekKey } from './nutrition'
+import { authHeaders } from './ai'
 
 const AppContext = createContext(null)
 
@@ -96,18 +97,9 @@ export function AppProvider({ children }) {
       .from('credits')
       .select('balance')
       .eq('user_id', u.id)
-      .single()
-    if (creditsData) {
-      setCredits(creditsData.balance)
-    } else {
-      // Pas encore de ligne credits (nouveau compte) — la créer.
-      const { data: newCredits } = await supabase
-        .from('credits')
-        .upsert({ user_id: u.id, balance: 10 }, { onConflict: 'user_id' })
-        .select('balance')
-        .single()
-      setCredits(newCredits?.balance ?? 0)
-    }
+      .maybeSingle()
+    // La ligne de crédits est créée côté base à l'inscription ; seul le serveur la modifie.
+    setCredits(creditsData?.balance ?? 0)
 
     // Repas du mois
     const thirtyDaysAgo = new Date()
@@ -182,27 +174,28 @@ export function AppProvider({ children }) {
     }
   }
 
-  // Debiter un crédit
+  // Pré-vérification d'UX uniquement : le vrai débit est fait par le serveur
+  // (/api/claude), impossible à contourner depuis le navigateur.
   const debitCredit = useCallback(async () => {
-    if (!user) return true
-    const hasActiveSub = userPlan !== 'free' && ['active', 'trialing', 'cancelling'].includes(subStatus)
-    if (!hasActiveSub) {
-      showToast('❌ Abonnement requis. Essayez gratuitement 7 jours !')
+    if (!user) return false
+    const isVip = userPlan === 'vip' && ['active', 'trialing', 'cancelling'].includes(subStatus)
+    if (!isVip && credits <= 0) {
+      showToast('❌ Plus de crédits IA. Passez à un abonnement pour continuer.')
       return false
     }
-    if (userPlan === 'vip') return true
-
-    const { data } = await supabase.from('credits').select('balance').eq('user_id', user.id).single()
-    const balance = data?.balance ?? 0
-    if (balance <= 0) {
-      showToast('❌ Plus de crédits ! Renouvelez votre abonnement.')
-      return false
-    }
-    const newBalance = balance - 1
-    await supabase.from('credits').update({ balance: newBalance, updated_at: new Date().toISOString() }).eq('user_id', user.id)
-    setCredits(newBalance)
     return true
-  }, [user, userPlan, subStatus, showToast])
+  }, [user, userPlan, subStatus, credits, showToast])
+
+  // Retour des appels IA : mise à jour des crédits et messages d'erreur serveur.
+  useEffect(() => {
+    const onAi = (e) => {
+      const { balance, error } = e.detail || {}
+      if (typeof balance === 'number') setCredits(balance)
+      if (error) showToast(`❌ ${error}`)
+    }
+    window.addEventListener('kalzo:ai', onAi)
+    return () => window.removeEventListener('kalzo:ai', onAi)
+  }, [showToast])
 
   // Ajouter un repas
   const addMeal = useCallback(async (entry) => {
@@ -355,19 +348,15 @@ export function AppProvider({ children }) {
   // Subscribe
   const subscribe = useCallback(async (plan) => {
     if (!user) return
-    const priceIds = {
-      standard: 'price_1Tc6S51JEMfMTdulDYObGtXg',
-      vip: 'price_1Tc6Sf1JEMfMTdulDT6umOCm',
-    }
     showToast('⏳ Redirection vers le paiement...')
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priceId: priceIds[plan], userId: user.id, userEmail: user.email }),
+      headers: await authHeaders(),
+      body: JSON.stringify({ plan }),
     })
     const data = await res.json()
     if (data.url) window.location.href = data.url
-    else showToast('❌ Erreur lors de la redirection')
+    else showToast(`❌ ${data?.error?.message || 'Erreur lors de la redirection'}`)
   }, [user, showToast])
 
   // Cancel subscription
@@ -376,15 +365,14 @@ export function AppProvider({ children }) {
     showToast('⏳ Résiliation en cours...')
     const res = await fetch('/api/cancel-subscription', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id }),
+      headers: await authHeaders(),
     })
     const data = await res.json()
     if (data.success) {
       setSubStatus('cancelling')
       showToast('✅ Abonnement résilié. Accès maintenu jusqu\'à la fin de la période.')
     } else {
-      showToast('❌ Erreur lors de la résiliation')
+      showToast(`❌ ${data?.error?.message || 'Erreur lors de la résiliation'}`)
     }
   }, [user, showToast])
 

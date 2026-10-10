@@ -1,37 +1,49 @@
+import { adminClient, requireUser, jsonError } from '@/lib/server/supabase-admin'
+import { PLANS, SITE_URL } from '@/lib/constants'
+
 export async function POST(request) {
+  const user = await requireUser(request)
+  if (!user) return jsonError('Connexion requise.', 401, 'unauthenticated')
+
+  let plan
   try {
-    const { priceId, userId, userEmail } = await request.json()
-    // VERCEL_URL pointe vers l'alias interne du déploiement (protégé par
-    // Vercel Authentication), pas vers le domaine public — on utilise
-    // toujours le domaine custom pour la redirection post-paiement.
-    const siteUrl = 'https://kalzo.vercel.app'
+    ;({ plan } = await request.json())
+  } catch {
+    return jsonError('Requête invalide.', 400, 'bad_request')
+  }
+  if (!PLANS[plan]) return jsonError('Offre inconnue.', 400, 'bad_request')
 
-    const PRICE_STANDARD = 'price_1Tc6S51JEMfMTdulDYObGtXg'
-    const PRICE_VIP = 'price_1Tc6Sf1JEMfMTdulDT6umOCm'
-    let plan = 'unknown'
-    if (priceId === PRICE_STANDARD) plan = 'standard'
-    if (priceId === PRICE_VIP) plan = 'vip'
+  // Pas de second abonnement par-dessus un abonnement en cours.
+  const { data: profile } = await adminClient()
+    .from('profiles')
+    .select('subscription_status')
+    .eq('id', user.id)
+    .single()
+  if (['active', 'trialing', 'past_due'].includes(profile?.subscription_status)) {
+    return jsonError('Vous avez déjà un abonnement en cours.', 409, 'already_subscribed')
+  }
 
-    const params = new URLSearchParams({
-      'payment_method_types[]': 'card',
-      'mode': 'subscription',
-      'line_items[0][price]': priceId,
-      'line_items[0][quantity]': '1',
-      'success_url': `${siteUrl}?payment=success&plan=${plan}`,
-      'cancel_url': `${siteUrl}?payment=cancelled`,
-      'customer_email': userEmail,
-      'metadata[user_id]': userId,
-      'metadata[plan]': plan,
-      'subscription_data[trial_period_days]': '7',
-      'subscription_data[metadata][user_id]': userId,
-      'subscription_data[metadata][plan]': plan,
-      'allow_promotion_codes': 'true',
-    })
+  const params = new URLSearchParams({
+    'payment_method_types[]': 'card',
+    mode: 'subscription',
+    'line_items[0][price]': PLANS[plan].priceId,
+    'line_items[0][quantity]': '1',
+    success_url: `${SITE_URL}?payment=success&plan=${plan}`,
+    cancel_url: `${SITE_URL}?payment=cancelled`,
+    customer_email: user.email,
+    'metadata[user_id]': user.id,
+    'metadata[plan]': plan,
+    'subscription_data[trial_period_days]': '7',
+    'subscription_data[metadata][user_id]': user.id,
+    'subscription_data[metadata][plan]': plan,
+    allow_promotion_codes: 'true',
+  })
 
+  try {
     const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+        Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: params.toString(),
@@ -40,6 +52,7 @@ export async function POST(request) {
     if (session.error) throw new Error(session.error.message)
     return Response.json({ url: session.url })
   } catch (err) {
-    return Response.json({ error: err.message }, { status: 500 })
+    console.error('[checkout]', err.message)
+    return jsonError('Impossible de lancer le paiement.', 500, 'server_error')
   }
 }

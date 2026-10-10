@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useApp } from '@/lib/AppContext'
+import { aiFetch } from '@/lib/ai'
 
 export default function SaisieIA({ onNavigate }) {
   const { debitCredit, addMeal, showToast } = useApp()
@@ -54,7 +55,7 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown) avec ce format:
 }`
       })
 
-      const res = await fetch('/api/claude', {
+      const res = await aiFetch({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ max_tokens: 800, messages: [{ role: 'user', content }] })
