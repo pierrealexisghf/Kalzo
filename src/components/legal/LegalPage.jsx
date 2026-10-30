@@ -24,6 +24,7 @@ export function LegalPage({ title, updated, children }) {
           <a href="/confidentialite">Confidentialité</a>
           <a href="/cgu">CGU</a>
           <a href="/cgv">CGV</a>
+          <a href="/support">Support</a>
         </p>
       </footer>
     </main>

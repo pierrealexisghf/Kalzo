@@ -5,15 +5,17 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kalzo.vercel.app'
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: 'Kalzo — Coach nutrition, sport & hydratation', template: '%s · Kalzo' },
+  title: { default: 'Kalzo — Le BeReal du repas', template: '%s · Kalzo' },
   description:
-    "Suivez vos repas, votre activité et votre hydratation, et laissez l'IA vous guider : analyse de repas par photo, recettes anti-gaspi, plan sur 7 jours.",
+    "Poste ton déjeuner et ton dîner à tes amis, avec une note en étoiles et les macros, sans afficher les calories. Journal souvenirs et coach IA.",
   manifest: '/manifest.json',
+  // À activer quand l'identifiant de l'app est connu : NEXT_PUBLIC_APPSTORE_ID=123456789
+  ...(process.env.NEXT_PUBLIC_APPSTORE_ID ? { itunes: { appId: process.env.NEXT_PUBLIC_APPSTORE_ID } } : {}),
   applicationName: 'Kalzo',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Kalzo' },
   openGraph: {
-    title: 'Kalzo — Coach nutrition, sport & hydratation',
-    description: "Votre coach nutrition avec IA : repas, sport, eau, objectifs.",
+    title: 'Kalzo — Le BeReal du repas',
+    description: "Poste ton repas, partage-le avec tes amis, reçois ta note en étoiles. 7 jours d'essai gratuit.",
     siteName: 'Kalzo',
     locale: 'fr_FR',
     type: 'website',
