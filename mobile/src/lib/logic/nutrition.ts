@@ -124,7 +124,9 @@ export function planWeightGoal(p: {
 }
 
 export type WeightEntry = { date: string; weight: number }
-export type WeightGoal = { startWeight?: number; targetWeight: number; weeks?: number; startDate?: string }
+export type WeightGoal = {
+  v?: number; startWeight?: number; targetWeight: number; weeks?: number; startDate?: string; adaptCalories?: boolean; dailyDelta?: number
+}
 
 export function goalProgress(goal: WeightGoal, entries: WeightEntry[] | null, fallbackWeight: number) {
   const sorted = [...(entries || [])].sort((a, b) => a.date.localeCompare(b.date))
