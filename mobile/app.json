@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Kalzo",
+    "slug": "kalzo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "kalzo",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "fr.kalzo.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Kalzo utilise l'appareil photo pour photographier tes repas et estimer leurs valeurs nutritionnelles.",
+        "NSPhotoLibraryUsageDescription": "Kalzo accède à ta photothèque pour que tu puisses choisir la photo d'un repas.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "fr.kalzo.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0d3b2a",
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-localization",
+      [
+        "expo-splash-screen",
+        { "backgroundColor": "#0d3b2a", "image": "./assets/images/splash-icon.png", "imageWidth": 120 }
+      ],
+      [
+        "expo-camera",
+        { "cameraPermission": "Kalzo utilise l'appareil photo pour photographier tes repas." }
+      ],
+      [
+        "expo-image-picker",
+        { "photosPermission": "Kalzo accède à ta photothèque pour que tu puisses choisir la photo d'un repas." }
+      ],
+      [
+        "expo-notifications",
+        { "color": "#0d3b2a" }
+      ]
+    ],
+    "experiments": { "typedRoutes": true },
+    "extra": { "eas": { "projectId": "" } }
+  }
+}
