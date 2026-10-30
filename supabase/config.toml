@@ -1,0 +1,19 @@
+# Config minimale pour déployer les Edge Functions avec la CLI Supabase
+# (`supabase link --project-ref <ref>` puis `supabase functions deploy`).
+# Les fonctions appelées par un serveur tiers (base de données, RevenueCat, cron) n'ont pas de
+# jeton utilisateur : elles se protègent par un secret partagé, vérifié dans le code.
+project_id = "kalzo"
+
+[functions.notify]
+verify_jwt = false
+[functions.purge-photos]
+verify_jwt = false
+[functions.revenuecat-webhook]
+verify_jwt = false
+# ai, delete-account et export-data vérifient le jeton de l'utilisateur dans le code.
+[functions.ai]
+verify_jwt = false
+[functions.delete-account]
+verify_jwt = false
+[functions.export-data]
+verify_jwt = false
