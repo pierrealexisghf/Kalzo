@@ -24,6 +24,8 @@
       },
       "permissions": [
         "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ]
     },
@@ -71,6 +73,12 @@
         }
       }
     },
-    "owner": "pierrealexisghf"
+    "owner": "pierrealexisghf",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a67b2c5e-928e-46ed-a30f-968d39cc6a4d"
+    }
   }
 }
