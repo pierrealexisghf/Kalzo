@@ -12,6 +12,7 @@ import { SessionProvider, useSession } from '@/state/session'
 import { DataProvider, useData } from '@/state/data'
 import { useAuthLinks } from '@/lib/deeplinks'
 import { initPurchases, resetPurchases } from '@/lib/purchases'
+import { NotificationsSync } from '@/components/NotificationsSync'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -38,6 +39,7 @@ function Gate() {
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
+      {session && !needsUsername && !needsProfile ? <NotificationsSync /> : null}
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
         <Stack.Protected guard={!!session && recovery}>
           <Stack.Screen name="reset-password" options={{ gestureEnabled: false }} />
