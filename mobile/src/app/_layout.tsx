@@ -11,6 +11,7 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { SessionProvider, useSession } from '@/state/session'
 import { DataProvider, useData } from '@/state/data'
 import { useAuthLinks } from '@/lib/deeplinks'
+import { initPurchases, resetPurchases } from '@/lib/purchases'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -19,6 +20,12 @@ function Gate() {
   const { session, loading, account, recovery } = useSession()
   const { ready, profile } = useData()
   useAuthLinks(() => {})
+  const userId = session?.user.id
+  // RevenueCat est identifié par l'identifiant Supabase : le webhook sait ainsi à quel profil rattacher l'achat.
+  useEffect(() => {
+    if (userId) initPurchases(userId).catch(() => {})
+    else resetPurchases()
+  }, [userId])
 
   // On attend que le compte ET les données soient chargés avant d'aiguiller (pas de flash d'écran).
   const resolving = loading || (!!session && (!account || !ready))
