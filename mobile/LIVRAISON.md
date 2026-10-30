@@ -23,7 +23,7 @@ Branche `feature/expo-social` — **rien n'a été poussé, appliqué en product
 ## 4. Secrets et variables
 - **Edge Functions** : `ANTHROPIC_API_KEY`, `WEBHOOK_SECRET` (≥16 car., même valeur dans `private_settings`), `REVENUECAT_WEBHOOK_SECRET`, `STRIPE_SECRET_KEY` (résiliation héritée), `REVENUECAT_SECRET_KEY` (optionnel, effacement RevenueCat), `EXPO_ACCESS_TOKEN` (optionnel). `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont fournis par Supabase.
 - **App (`mobile/.env`, EAS)** : `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_REVENUECAT_IOS_KEY`.
-- **Vercel** : `NEXT_PUBLIC_APP_STORE_URL` (active le bouton), `NEXT_PUBLIC_APPSTORE_ID` (bannière Safari). Remplacer `TEAMID` dans l'AASA.
+- **Vercel** : `NEXT_PUBLIC_APP_STORE_URL` (active le bouton), `NEXT_PUBLIC_APPSTORE_ID` (bannière Safari). Team ID Apple (UU53L7L6ZR) déjà renseigné dans l’AASA.
 
 ## 5. Étapes manuelles
 1. SQL Editor NutriFlow : coller `03-social.sql` ; activer `pg_net` et `pg_cron` (Database › Extensions) puis relancer ; insérer `functions_url` + `webhook_secret` dans `private_settings` (commentaire en bas du script) ; Security Advisor + Performance Advisor.
