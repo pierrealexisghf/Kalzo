@@ -10,6 +10,7 @@ export default function AppLayout() {
         presentation: 'formSheet', sheetGrabberVisible: true, sheetAllowedDetents: [0.62], sheetCornerRadius: 28,
         contentStyle: { backgroundColor: colors.card },
       }} />
+      <Stack.Screen name="comments/[id]" options={{ presentation: 'formSheet', sheetGrabberVisible: true, sheetAllowedDetents: [0.75, 1], sheetCornerRadius: 28 }} />
       <Stack.Screen name="capture" options={{ presentation: 'fullScreenModal', animation: 'fade', contentStyle: { backgroundColor: '#000' } }} />
       <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
     </Stack>
