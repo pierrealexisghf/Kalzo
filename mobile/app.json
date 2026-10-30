@@ -21,7 +21,11 @@
       "adaptiveIcon": {
         "backgroundColor": "#0d3b2a",
         "foregroundImage": "./assets/images/android-icon-foreground.png"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -29,22 +33,44 @@
       "expo-localization",
       [
         "expo-splash-screen",
-        { "backgroundColor": "#0d3b2a", "image": "./assets/images/splash-icon.png", "imageWidth": 120 }
+        {
+          "backgroundColor": "#0d3b2a",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120
+        }
       ],
       [
         "expo-camera",
-        { "cameraPermission": "Kalzo utilise l'appareil photo pour photographier tes repas." }
+        {
+          "cameraPermission": "Kalzo utilise l'appareil photo pour photographier tes repas."
+        }
       ],
       [
         "expo-image-picker",
-        { "photosPermission": "Kalzo accède à ta photothèque pour que tu puisses choisir la photo d'un repas." }
+        {
+          "photosPermission": "Kalzo accède à ta photothèque pour que tu puisses choisir la photo d'un repas."
+        }
       ],
       [
         "expo-notifications",
-        { "color": "#0d3b2a" }
+        {
+          "color": "#0d3b2a"
+        }
       ]
     ],
-    "experiments": { "typedRoutes": true },
-    "extra": { "eas": { "projectId": "" } }
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a67b2c5e-928e-46ed-a30f-968d39cc6a4d"
+      },
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      }
+    },
+    "owner": "pierrealexisghf"
   }
 }
