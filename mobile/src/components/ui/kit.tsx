@@ -152,7 +152,7 @@ export function Header({ title, subtitle, onBack, right }: { title: string; subt
       {onBack ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Retour" hitSlop={8}
           onPress={() => (typeof onBack === 'function' ? onBack() : router.back())}>
-          <Glass interactive style={{ width: MIN_TOUCH, height: MIN_TOUCH, borderRadius: 22, alignItems: 'center', justifyContent: 'center' }}
+          <Glass clear interactive style={{ width: MIN_TOUCH, height: MIN_TOUCH, borderRadius: 22, alignItems: 'center', justifyContent: 'center' }}
             fallbackStyle={{ backgroundColor: colors.muted }}>
             <Text size={20} weight={700}>‹</Text>
           </Glass>

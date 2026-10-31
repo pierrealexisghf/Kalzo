@@ -21,12 +21,12 @@ const ITEMS: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMa
 // Barre du bas en capsule flottante : Feed | Journal | ➕ | Coach IA | Profil.
 // Le ➕ n'est pas une page : il ouvre la feuille d'ajout.
 export function FloatingTabBar({ state, emitter, navigateToTab }: BarProps) {
-  const { colors } = useTheme()
+  const { colors, isDark } = useTheme()
   const insets = useSafeAreaInsets()
   const router = useRouter()
   return (
     <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: Math.max(insets.bottom, 12), alignItems: 'center' }}>
-      <Glass
+      <Glass clear
         style={{ flexDirection: 'row', alignItems: 'center', height: TAB_BAR_HEIGHT, marginHorizontal: 16, paddingHorizontal: 8, borderRadius: 34 }}
         fallbackStyle={{
           backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border,
@@ -51,7 +51,7 @@ export function FloatingTabBar({ state, emitter, navigateToTab }: BarProps) {
                 const e = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true })
                 if (!focused && !e.defaultPrevented) { haptics.select(); navigateToTab(route.key) }
               }}
-              style={{ width: 66, height: 56, alignItems: 'center', justifyContent: 'center', gap: 2, borderRadius: 28, backgroundColor: focused && glassAvailable ? colors.accent : 'transparent' }}>
+              style={{ width: 66, height: 56, alignItems: 'center', justifyContent: 'center', gap: 2, borderRadius: 28, backgroundColor: focused && glassAvailable ? (isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.07)') : 'transparent' }}>
               <Ionicons name={focused ? item.active : item.icon} size={24} color={focused ? colors.primary : colors.mutedFg} />
               <Text size={10.5} weight={focused ? 700 : 500} style={{ color: focused ? colors.primary : colors.mutedFg }} numberOfLines={1}>{item.label}</Text>
             </Pressable>
