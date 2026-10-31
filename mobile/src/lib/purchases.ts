@@ -1,19 +1,21 @@
 import { Platform } from 'react-native'
 import Purchases, { type PurchasesPackage } from 'react-native-purchases'
 
-// Achats intégrés Apple via RevenueCat. Un seul groupe d'abonnements : 3 offres × 3 durées = 9 produits.
+// Achats intégrés Apple via RevenueCat. Un seul groupe d'abonnements : 2 offres × 2 durées = 4 produits au lancement.
 export type PaidPlan = 'essentiel' | 'plus' | 'illimite'
 export type Duration = 'monthly' | 'quarterly' | 'annual'
-export const PAID_PLANS: PaidPlan[] = ['essentiel', 'plus', 'illimite']
+// Offres proposées au lancement : Essentiel et Plus, en mensuel ou annuel (Illimité et le trimestriel restent
+// reconnus côté serveur pour d'éventuels achats futurs, mais ne sont pas affichés).
+export const PAID_PLANS: PaidPlan[] = ['essentiel', 'plus']
 export const DURATIONS: { id: Duration; label: string; months: number }[] = [
-  { id: 'monthly', label: 'Mensuel', months: 1 }, { id: 'quarterly', label: '3 mois', months: 3 }, { id: 'annual', label: 'Annuel', months: 12 },
+  { id: 'monthly', label: 'Mensuel', months: 1 }, { id: 'annual', label: 'Annuel', months: 12 },
 ]
 export const productId = (plan: PaidPlan, d: Duration) => `fr.kalzo.${plan}.${d}`
 
 // Prix de départ (App Store Connect fait foi : le prix affiché vient du produit quand il est chargé).
 export const DEFAULT_PRICES: Record<PaidPlan, Record<Duration, number>> = {
-  essentiel: { monthly: 4.99, quarterly: 12.99, annual: 39.99 },
-  plus: { monthly: 7.99, quarterly: 20.99, annual: 64.99 },
+  essentiel: { monthly: 3.99, quarterly: 9.99, annual: 29.99 },
+  plus: { monthly: 6.99, quarterly: 17.99, annual: 49.99 },
   illimite: { monthly: 10.99, quarterly: 28.99, annual: 89.99 },
 }
 export const fmtEur = (n: number) => `${n.toFixed(2).replace('.', ',')} €`

@@ -47,7 +47,7 @@ export default function Coach() {
           <Ionicons name="lock-closed" size={28} color="#fff" />
           <View style={{ flex: 1 }}>
             <Text color="white" weight={800} size={16}>{plan === 'essentiel' ? 'Disponible avec Plus' : 'Bloqué sans abonnement'}</Text>
-            <Text color="white" size={13} style={{ opacity: 0.9 }}>{plan === 'essentiel' ? 'Passe à l’offre Plus pour débloquer le coach.' : 'Le coach est inclus avec Plus et Illimité.'}</Text>
+            <Text color="white" size={13} style={{ opacity: 0.9 }}>{plan === 'essentiel' ? 'Passe à l’offre Plus pour débloquer le coach.' : 'Le coach est inclus avec l’offre Plus.'}</Text>
           </View>
           <Text color="white" weight={800}>Souscrire ›</Text>
         </Card>

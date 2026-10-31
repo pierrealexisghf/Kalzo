@@ -18,7 +18,7 @@ import * as haptics from '@/lib/haptics'
 const SITE = 'https://kalzo.vercel.app'
 const REASONS: Record<string, string> = {
   quota_weekly: 'Tu as utilisé tous tes scans de la semaine. Choisis une offre pour continuer à scanner.',
-  subscription_required: 'Le coach IA est inclus avec les offres Plus et Illimité.',
+  subscription_required: 'Le coach IA est inclus avec l’offre Plus.',
 }
 
 export default function Paywall() {
