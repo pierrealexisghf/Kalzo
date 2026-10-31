@@ -17,10 +17,11 @@ type Props = {
   onReact: (post: FeedPost, emoji: string) => void
   onHide: (post: FeedPost) => void
   onReport: (post: FeedPost) => void
+  onBlock: (post: FeedPost) => void
 }
 
 // Carte du feed : photo, note, protéines/glucides/lipides. JAMAIS de calories.
-export const PostCard = memo(function PostCard({ post, onReact, onHide, onReport }: Props) {
+export const PostCard = memo(function PostCard({ post, onReact, onHide, onReport, onBlock }: Props) {
   const { colors } = useTheme()
   const router = useRouter()
   const url = usePhotoUrl(post.photo_path)
@@ -30,10 +31,10 @@ export const PostCard = memo(function PostCard({ post, onReact, onHide, onReport
   const menu = () => {
     haptics.tap()
     if (post.is_me) return
-    const opts = ['Signaler', 'Masquer ce repas', 'Annuler']
-    const run = (i: number) => { if (i === 0) onReport(post); if (i === 1) onHide(post) }
-    if (Platform.OS === 'ios') ActionSheetIOS.showActionSheetWithOptions({ options: opts, cancelButtonIndex: 2, destructiveButtonIndex: 0 }, run)
-    else Alert.alert('Ce repas', undefined, [{ text: 'Signaler', onPress: () => run(0) }, { text: 'Masquer ce repas', onPress: () => run(1) }, { text: 'Annuler', style: 'cancel' }])
+    const opts = ['Signaler', 'Masquer ce repas', `Bloquer @${post.username}`, 'Annuler']
+    const run = (i: number) => { if (i === 0) onReport(post); if (i === 1) onHide(post); if (i === 2) onBlock(post) }
+    if (Platform.OS === 'ios') ActionSheetIOS.showActionSheetWithOptions({ options: opts, cancelButtonIndex: 3, destructiveButtonIndex: [0, 2] }, run)
+    else Alert.alert('Ce repas', undefined, [{ text: 'Signaler', onPress: () => run(0) }, { text: 'Masquer ce repas', onPress: () => run(1) }, { text: `Bloquer @${post.username}`, onPress: () => run(2) }, { text: 'Annuler', style: 'cancel' }])
   }
 
   return (

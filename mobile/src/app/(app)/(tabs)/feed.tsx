@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Pressable, RefreshControl, View } from 'react-native'
+import { Alert, Pressable, RefreshControl, View } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
 import { useIsFocused, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -11,7 +11,7 @@ import { useToast } from '@/components/ui/Toast'
 import { PostCard } from '@/components/PostCard'
 import { TAB_BAR_HEIGHT } from '@/components/FloatingTabBar'
 import { useTheme } from '@/theme'
-import { feedPage, hideMeal, overview, react, reportMeal, type FeedPost } from '@/lib/social'
+import { blockUser, feedPage, hideMeal, overview, react, reportMeal, type FeedPost } from '@/lib/social'
 import { todayKey } from '@/lib/logic/dates'
 import * as haptics from '@/lib/haptics'
 
@@ -76,6 +76,14 @@ export default function Feed() {
     catch (e) { toast.show((e as Error).message, 'error') }
   }, [toast])
 
+  const onBlock = useCallback((post: FeedPost) => Alert.alert(`Bloquer @${post.username} ?`, 'Vous ne verrez plus les repas ni les commentaires l’un de l’autre. Vous pouvez débloquer depuis « Mes amis ».', [
+    { text: 'Annuler', style: 'cancel' },
+    { text: 'Bloquer', style: 'destructive', onPress: async () => {
+      try { await blockUser(post.username); setPosts(ps => ps && ps.filter(p => p.username !== post.username)); toast.show(`@${post.username} est bloqué.`, 'success') }
+      catch (e) { toast.show((e as Error).message, 'error') }
+    } },
+  ]), [toast])
+
   // Carte « Tu n'as pas encore posté ton déjeuner / dîner » : ouvre directement la caméra.
   const hour = new Date().getHours()
   const today = dailyMeals[todayKey()] || []
@@ -110,7 +118,7 @@ export default function Feed() {
         <FlashList
           data={posts}
           keyExtractor={p => p.id}
-          renderItem={({ item }) => <View style={{ paddingBottom: 14 }}><PostCard post={item} onReact={onReact} onHide={onHide} onReport={onReport} /></View>}
+          renderItem={({ item }) => <View style={{ paddingBottom: 14 }}><PostCard post={item} onReact={onReact} onHide={onHide} onReport={onReport} onBlock={onBlock} /></View>}
           ListHeaderComponent={header}
           ListEmptyComponent={<EmptyState emoji="🍽️" title="Le feed est encore vide" text="Poste ton premier repas, ou ajoute des amis pour voir ce qu’ils mangent." action={<Button label="Trouver des amis" onPress={() => router.push('/friends')} />} />}
           ListFooterComponent={loadingMore ? <Skeleton height={80} radius={24} /> : null}

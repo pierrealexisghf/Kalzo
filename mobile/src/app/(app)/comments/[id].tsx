@@ -6,7 +6,7 @@ import { EmptyState, Input, Skeleton } from '@/components/ui/kit'
 import { Text } from '@/components/ui/Text'
 import { useToast } from '@/components/ui/Toast'
 import { useTheme } from '@/theme'
-import { addComment, deleteComment, listComments, reportMeal, type Comment } from '@/lib/social'
+import { addComment, blockUser, deleteComment, listComments, reportMeal, type Comment } from '@/lib/social'
 import * as haptics from '@/lib/haptics'
 
 export default function Comments() {
@@ -31,7 +31,11 @@ export default function Comments() {
   }
   const actions = (c: Comment) => {
     if (c.can_delete) Alert.alert('Supprimer ce commentaire ?', undefined, [{ text: 'Annuler', style: 'cancel' }, { text: 'Supprimer', style: 'destructive', onPress: async () => { await deleteComment(c.id).catch(() => {}); load() } }])
-    else Alert.alert('Signaler ce commentaire ?', undefined, [{ text: 'Annuler', style: 'cancel' }, { text: 'Signaler', style: 'destructive', onPress: async () => { await reportMeal(id, 'inappropriate', c.id).catch(() => {}); toast.show('Signalement envoyé', 'success') } }])
+    else Alert.alert('Ce commentaire', undefined, [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Signaler', style: 'destructive', onPress: async () => { await reportMeal(id, 'inappropriate', c.id).catch(() => {}); toast.show('Signalement envoyé', 'success') } },
+      { text: `Bloquer @${c.username}`, style: 'destructive', onPress: async () => { await blockUser(c.username).catch(() => {}); toast.show(`@${c.username} est bloqué.`, 'success'); load() } },
+    ])
   }
 
   return (
@@ -39,7 +43,7 @@ export default function Comments() {
       <View style={{ padding: 16, paddingBottom: 8 }}><Text size={20} weight={800}>Commentaires</Text></View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 14 }} keyboardShouldPersistTaps="handled">
         {items === null ? <><Skeleton height={44} /><Skeleton height={44} /></> : items.length === 0 ? <EmptyState emoji="💬" title="Pas encore de commentaire" text="Sois le premier à réagir." /> : items.map(c => (
-          <Pressable key={c.id} accessibilityRole="button" accessibilityHint={c.can_delete ? 'Appui long pour supprimer' : 'Appui long pour signaler'} onLongPress={() => actions(c)} style={{ flexDirection: 'row', gap: 10 }}>
+          <Pressable key={c.id} accessibilityRole="button" accessibilityHint={c.can_delete ? 'Appui long pour supprimer' : 'Appui long pour signaler ou bloquer'} onPress={() => { if (!c.is_me) actions(c) }} onLongPress={() => actions(c)} style={{ flexDirection: 'row', gap: 10 }}>
             <Avatar name={c.first_name || c.username} username={c.username} size={34} />
             <View style={{ flex: 1 }}>
               <Text size={13} weight={700}>{c.is_me ? 'Toi' : c.first_name || c.username} <Text size={12} color="muted">@{c.username}</Text></Text>
