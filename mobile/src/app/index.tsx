@@ -64,6 +64,15 @@ export default function Index() {
         </Pressable>
       ))}
       {piece !== null ? <Boundary key={piece}>{PIECES[piece][1]()}</Boundary> : null}
+      {([
+        ['N1 replace vers page vide', () => router.replace('/probe' as Href)],
+        ['N2 push vers page vide', () => router.push('/probe' as Href)],
+        ['N3 push vers bienvenue', () => router.push('/welcome' as Href)],
+      ] as [string, () => void][]).map(([n, f]) => (
+        <Pressable key={n} onPress={f} style={{ padding: 12, borderRadius: 12, backgroundColor: '#532', alignItems: 'center' }}>
+          <Text style={{ color: '#fff', fontWeight: '600' }}>{n}</Text>
+        </Pressable>
+      ))}
       {log.map((l, i) => <Text key={i} style={{ color: '#9f9' }}>{l}</Text>)}
       <Pressable onPress={() => router.replace(href)} style={{ padding: 16, borderRadius: 12, backgroundColor: '#2f9e6b', alignItems: 'center' }}>
         <Text style={{ color: '#fff', fontWeight: '700' }}>Ouvrir l’écran réel</Text>
