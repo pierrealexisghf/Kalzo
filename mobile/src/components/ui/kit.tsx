@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { radius, useTheme, MIN_TOUCH } from '@/theme'
 import { Text } from './Text'
+import { Glass } from './Glass'
 import * as haptics from '@/lib/haptics'
 
 export type Tone = 'nutri' | 'sport' | 'water' | 'weight' | 'coach'
@@ -150,9 +151,11 @@ export function Header({ title, subtitle, onBack, right }: { title: string; subt
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 }}>
       {onBack ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Retour" hitSlop={8}
-          onPress={() => (typeof onBack === 'function' ? onBack() : router.back())}
-          style={{ width: MIN_TOUCH, height: MIN_TOUCH, borderRadius: 22, backgroundColor: colors.muted, alignItems: 'center', justifyContent: 'center' }}>
-          <Text size={20} weight={700}>‹</Text>
+          onPress={() => (typeof onBack === 'function' ? onBack() : router.back())}>
+          <Glass interactive style={{ width: MIN_TOUCH, height: MIN_TOUCH, borderRadius: 22, alignItems: 'center', justifyContent: 'center' }}
+            fallbackStyle={{ backgroundColor: colors.muted }}>
+            <Text size={20} weight={700}>‹</Text>
+          </Glass>
         </Pressable>
       ) : null}
       <View style={{ flex: 1 }}>
