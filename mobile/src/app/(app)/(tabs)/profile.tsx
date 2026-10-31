@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, Linking, View } from 'react-native'
-import { useRouter } from 'expo-router'
-import { useIsFocused } from '@react-navigation/native'
+import { useIsFocused, useRouter } from 'expo-router'
 import * as Sharing from 'expo-sharing'
 import { File, Paths } from 'expo-file-system'
 import { supabase } from '@/lib/supabase'
