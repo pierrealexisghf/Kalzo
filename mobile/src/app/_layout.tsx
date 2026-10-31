@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Pressable, ScrollView, Text as RNText, View } from 'react-native'
 import { Stack, SplashScreen } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -15,6 +16,36 @@ import { initPurchases, resetPurchases } from '@/lib/purchases'
 import { NotificationsSync } from '@/components/NotificationsSync'
 
 SplashScreen.preventAutoHideAsync()
+
+// Filet de sécurité : une erreur JavaScript fatale n'éteint plus l'app, elle s'affiche avec son détail.
+declare const ErrorUtils: { setGlobalHandler: (h: (e: unknown, isFatal?: boolean) => void) => void } | undefined
+const errorListeners = new Set<(m: string) => void>()
+let lastError: string | null = null
+if (typeof ErrorUtils !== 'undefined') {
+  ErrorUtils.setGlobalHandler((e, isFatal) => {
+    const err = e as { message?: string; stack?: string } | undefined
+    lastError = `${isFatal ? 'Erreur fatale' : 'Erreur'} : ${err?.message ?? String(e)}\n\n${(err?.stack ?? '').slice(0, 1500)}`
+    errorListeners.forEach(l => l(lastError as string))
+  })
+}
+
+function ErrorOverlay() {
+  const [message, setMessage] = useState<string | null>(lastError)
+  useEffect(() => {
+    errorListeners.add(setMessage)
+    return () => { errorListeners.delete(setMessage) }
+  }, [])
+  if (!message) return null
+  return (
+    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#111', paddingTop: 70, paddingHorizontal: 16, paddingBottom: 40 }}>
+      <RNText style={{ color: '#fff', fontSize: 20, fontWeight: '700', marginBottom: 10 }}>Une erreur est survenue</RNText>
+      <ScrollView><RNText selectable style={{ color: '#ddd', fontSize: 12 }}>{message}</RNText></ScrollView>
+      <Pressable onPress={() => { lastError = null; setMessage(null) }} style={{ marginTop: 12, padding: 14, borderRadius: 12, backgroundColor: '#2f9e6b', alignItems: 'center' }}>
+        <RNText style={{ color: '#fff', fontWeight: '700' }}>Fermer</RNText>
+      </Pressable>
+    </View>
+  )
+}
 
 function Gate() {
   const { colors, isDark } = useTheme()
@@ -82,6 +113,7 @@ export default function RootLayout() {
           </ToastProvider>
         </ThemeProvider>
       </SafeAreaProvider>
+      <ErrorOverlay />
     </GestureHandlerRootView>
   )
 }
