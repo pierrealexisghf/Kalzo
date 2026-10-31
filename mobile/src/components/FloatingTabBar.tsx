@@ -32,10 +32,10 @@ export function FloatingTabBar({ state, emitter, navigateToTab }: BarProps) {
       }}>
         {state.routes.map((route, index) => {
           const focused = state.index === index
-          if (route.name === 'add') {
+          if (route.name === 'plus') {
             return (
               <Pressable key={route.key} accessibilityRole="button" accessibilityLabel="Ajouter" accessibilityHint="Ouvre le menu pour ajouter un repas, une activité, de l’eau ou ton poids"
-                onPress={() => { haptics.tap(); router.push('/(app)/add' as never) }}
+                onPress={() => { haptics.tap(); router.push('/add') }}
                 style={({ pressed }) => ({ width: 60, height: 60, borderRadius: 30, marginHorizontal: 6, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', transform: [{ scale: pressed ? 0.94 : 1 }] })}>
                 <Ionicons name="add" size={34} color={colors.primaryFg} />
               </Pressable>

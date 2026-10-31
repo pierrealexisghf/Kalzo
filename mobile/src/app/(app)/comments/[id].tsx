@@ -40,7 +40,7 @@ export default function Comments() {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 14 }} keyboardShouldPersistTaps="handled">
         {items === null ? <><Skeleton height={44} /><Skeleton height={44} /></> : items.length === 0 ? <EmptyState emoji="💬" title="Pas encore de commentaire" text="Sois le premier à réagir." /> : items.map(c => (
           <Pressable key={c.id} accessibilityRole="button" accessibilityHint={c.can_delete ? 'Appui long pour supprimer' : 'Appui long pour signaler'} onLongPress={() => actions(c)} style={{ flexDirection: 'row', gap: 10 }}>
-            <Avatar name={c.first_name || c.username} size={34} />
+            <Avatar name={c.first_name || c.username} username={c.username} size={34} />
             <View style={{ flex: 1 }}>
               <Text size={13} weight={700}>{c.is_me ? 'Toi' : c.first_name || c.username} <Text size={12} color="muted">@{c.username}</Text></Text>
               <Text size={15}>{c.body}</Text>

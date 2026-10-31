@@ -18,7 +18,7 @@ export const APP_LINK = 'https://kalzo.vercel.app'
 function Row({ u, children, onPress }: { u: FriendRow; children?: React.ReactNode; onPress?: () => void }) {
   return (
     <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 }} onPress={onPress}>
-      <Avatar name={u.first_name || u.username} />
+      <Avatar name={u.first_name || u.username} username={u.username} />
       <View style={{ flex: 1 }}>
         <Text weight={700} numberOfLines={1}>{u.first_name || u.username}</Text>
         <Text size={12.5} color="muted">@{u.username}</Text>

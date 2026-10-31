@@ -3,12 +3,12 @@ import { adminClient, json, jsonError, PHOTO_BUCKET, requireUser } from '../_sha
 // Droit à l'effacement (RGPD, art. 17) — suppression DANS l'app (obligatoire App Store).
 // Ordre : abonnement Stripe hérité → photos → données → compte. En cas d'erreur, on s'arrête
 // avant de supprimer le compte pour que l'utilisateur puisse réessayer.
-async function removeFolder(admin: ReturnType<typeof adminClient>, folder: string) {
+async function removeFolder(admin: ReturnType<typeof adminClient>, folder: string, bucket = PHOTO_BUCKET) {
   for (;;) {
-    const { data, error } = await admin.storage.from(PHOTO_BUCKET).list(folder, { limit: 1000 })
+    const { data, error } = await admin.storage.from(bucket).list(folder, { limit: 1000 })
     if (error) throw new Error(`storage list: ${error.message}`)
     if (!data?.length) return
-    const { error: rmError } = await admin.storage.from(PHOTO_BUCKET).remove(data.map((f) => `${folder}/${f.name}`))
+    const { error: rmError } = await admin.storage.from(bucket).remove(data.map((f) => `${folder}/${f.name}`))
     if (rmError) throw new Error(`storage remove: ${rmError.message}`)
   }
 }
@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
     }
 
     await removeFolder(admin, user.id)
+    await removeFolder(admin, user.id, 'avatars') // photo de profil
 
     // Les tables sociales (amitiés, réactions, commentaires, jetons push…) partent en cascade avec le compte.
     for (const table of ['consumed_meals', 'sport_activities', 'hydration', 'ai_usage', 'transactions', 'credits']) {

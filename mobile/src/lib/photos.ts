@@ -25,6 +25,8 @@ async function render(uri: string, side: number, qualities: number[], maxBytes: 
 
 /** Photo du repas : 1080 px max, JPEG ~0,7, ≤ 250 Ko (on baisse la qualité si besoin). */
 export const prepareMealPhoto = (uri: string) => render(uri, MAX_SIDE, [0.7, 0.6, 0.5, 0.4, 0.3], TARGET_BYTES)
+/** Photo de profil : carré 384 px max, JPEG ≤ 100 Ko. */
+export const prepareAvatar = (uri: string) => render(uri, 384, [0.7, 0.55, 0.4, 0.3], 100 * 1024)
 /** Miniature pour les grilles et le feed. */
 export const prepareThumb = (uri: string) => render(uri, THUMB_SIDE, [0.6, 0.45], 60 * 1024)
 

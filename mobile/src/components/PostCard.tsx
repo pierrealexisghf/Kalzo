@@ -40,7 +40,7 @@ export const PostCard = memo(function PostCard({ post, onReact, onHide, onReport
     <Card style={{ padding: 0, overflow: 'hidden' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={`Profil de ${who}`} onPress={() => router.push({ pathname: '/friend/[username]', params: { username: post.username } })} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-          <Avatar name={who} />
+          <Avatar name={who} username={post.username} />
           <View style={{ flex: 1 }}>
             <Text weight={700} numberOfLines={1}>{post.is_me ? 'Toi' : who} <Text size={13} color="muted">@{post.username}</Text></Text>
             <Text size={12.5} color="muted">{label} · {timeOf(post.consumed_at)}</Text>

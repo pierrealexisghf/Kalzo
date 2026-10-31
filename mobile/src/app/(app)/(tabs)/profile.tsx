@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Linking, View } from 'react-native'
+import { ActionSheetIOS, ActivityIndicator, Alert, Linking, Platform, Pressable, View } from 'react-native'
+import * as ImagePicker from 'expo-image-picker'
 import { useIsFocused, useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import * as Sharing from 'expo-sharing'
 import { File, Paths } from 'expo-file-system'
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/state/session'
 import { useData } from '@/state/data'
 import { Avatar } from '@/components/Avatar'
+import { removeMyAvatar, setMyAvatar, useAvatarUrl } from '@/lib/avatars'
 import { PostGrid } from '@/components/PostGrid'
 import { Group, Row } from '@/components/Row'
 import { Card, Screen, SectionTitle, Segmented } from '@/components/ui/kit'
@@ -23,7 +26,7 @@ import * as haptics from '@/lib/haptics'
 export const SITE = 'https://kalzo.vercel.app'
 
 export default function Profile() {
-  const { pref, setPref } = useTheme()
+  const { pref, setPref, colors } = useTheme()
   const router = useRouter()
   const toast = useToast()
   const focused = useIsFocused()
@@ -31,6 +34,7 @@ export default function Profile() {
   const data = useData()
   const [meals, setMeals] = useState<SharedMeal[]>([])
   const [friends, setFriends] = useState(0)
+  const [photoBusy, setPhotoBusy] = useState(false)
   const username = account?.username
   const name = account?.first_name || username || ''
   const avg = averageStars7d(data.dailyMeals)
@@ -43,6 +47,34 @@ export default function Profile() {
     overview().then(o => { if (alive) setFriends(o.friends.length) }).catch(() => {})
     return () => { alive = false }
   }, [focused, username])
+
+  const hasPhoto = !!useAvatarUrl(username)
+  const changePhoto = useCallback(async (source: 'library' | 'camera') => {
+    if (!user || !username) return
+    try {
+      if (source === 'camera' && !(await ImagePicker.requestCameraPermissionsAsync()).granted) {
+        return toast.show('Autorise l’appareil photo dans les réglages de l’iPhone.', 'error')
+      }
+      const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 1 }
+      const res = source === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts)
+      if (res.canceled || !res.assets[0]) return
+      setPhotoBusy(true)
+      await setMyAvatar(user.id, username, res.assets[0].uri)
+      haptics.success()
+    } catch { toast.show('Photo de profil impossible pour le moment.', 'error') } finally { setPhotoBusy(false) }
+  }, [user, username, toast])
+  const photoMenu = () => {
+    haptics.tap()
+    const remove = async () => {
+      if (!user || !username) return
+      setPhotoBusy(true)
+      try { await removeMyAvatar(user.id, username) } catch { toast.show('Suppression impossible pour le moment.', 'error') } finally { setPhotoBusy(false) }
+    }
+    const opts = ['Choisir dans la photothèque', 'Prendre une photo', ...(hasPhoto ? ['Retirer la photo'] : []), 'Annuler']
+    const run = (i: number) => { if (i === 0) changePhoto('library'); else if (i === 1) changePhoto('camera'); else if (hasPhoto && i === 2) remove() }
+    if (Platform.OS === 'ios') ActionSheetIOS.showActionSheetWithOptions({ options: opts, cancelButtonIndex: opts.length - 1, destructiveButtonIndex: hasPhoto ? 2 : undefined }, run)
+    else Alert.alert('Photo de profil', undefined, opts.map((o, i) => ({ text: o, style: i === opts.length - 1 ? 'cancel' as const : 'default' as const, onPress: () => run(i) })))
+  }
 
   const exportData = useCallback(async () => {
     toast.show('Préparation de ton export…')
@@ -69,7 +101,12 @@ export default function Profile() {
   return (
     <Screen bottomPad={TAB_BAR_HEIGHT + 24}>
       <Card style={{ alignItems: 'center', gap: 6, paddingVertical: 22 }}>
-        <Avatar name={name} size={76} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Changer ma photo de profil" onPress={photoMenu} disabled={photoBusy}>
+          <Avatar name={name} username={username} size={76} />
+          <View style={{ position: 'absolute', right: -2, bottom: -2, width: 26, height: 26, borderRadius: 13, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.card }}>
+            {photoBusy ? <ActivityIndicator size="small" color={colors.primaryFg} /> : <Ionicons name="camera" size={14} color={colors.primaryFg} />}
+          </View>
+        </Pressable>
         <Text size={24} weight={800}>{name}</Text>
         <Text color="muted">@{username}</Text>
         <View style={{ flexDirection: 'row', gap: 26, marginTop: 10 }}>

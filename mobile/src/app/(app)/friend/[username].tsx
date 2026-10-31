@@ -35,7 +35,7 @@ export default function FriendProfile() {
     <Screen>
       <Header title={`@${p.username}`} onBack />
       <Card style={{ alignItems: 'center', gap: 8 }}>
-        <Avatar name={p.first_name || p.username} size={72} />
+        <Avatar name={p.first_name || p.username} username={p.username} size={72} />
         <Text size={22} weight={800}>{p.first_name || p.username}</Text>
         <View style={{ flexDirection: 'row', gap: 24, marginTop: 6 }}>
           <View style={{ alignItems: 'center', gap: 4 }}>{p.scores.avg7 != null ? <Stars value={Number(p.scores.avg7)} size={16} /> : <Text color="muted">—</Text>}<Text size={11} color="muted" weight={600}>moyenne 7 jours</Text></View>
