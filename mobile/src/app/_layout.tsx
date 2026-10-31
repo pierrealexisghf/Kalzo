@@ -41,6 +41,7 @@ function Gate() {
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {session && !needsUsername && !needsProfile ? <NotificationsSync /> : null}
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+        <Stack.Screen name="index" />
         <Stack.Protected guard={!!session && recovery}>
           <Stack.Screen name="reset-password" options={{ gestureEnabled: false }} />
         </Stack.Protected>
