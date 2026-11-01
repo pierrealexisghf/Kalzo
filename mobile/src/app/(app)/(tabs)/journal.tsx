@@ -12,7 +12,7 @@ import { TAB_BAR_HEIGHT } from '@/components/FloatingTabBar'
 import { useTheme } from '@/theme'
 import { addDays, relativeDay, todayKey } from '@/lib/logic/dates'
 import { dayTotals, fmtMl, goalProgress } from '@/lib/logic/nutrition'
-import { averageStars7d, goodStreak } from '@/lib/logic/score'
+import { averageStars7d, postStreak } from '@/lib/logic/score'
 import * as haptics from '@/lib/haptics'
 
 export default function Journal() {
@@ -26,7 +26,7 @@ export default function Journal() {
 
   const t = dayTotals(data, day)
   const avg = averageStars7d(data.dailyMeals)
-  const streak = goodStreak(data.dailyMeals)
+  const streak = postStreak(data.dailyMeals)
   const lastW = data.weightEntries[data.weightEntries.length - 1]
   const gp = data.weightGoal && data.profile ? goalProgress(data.weightGoal, data.weightEntries, data.profile.weight) : null
 
@@ -53,7 +53,7 @@ export default function Journal() {
         </View>
         <View style={{ alignItems: 'center' }}>
           <Text size={26} weight={800}>🔥 {streak}</Text>
-          <Text size={11} color="muted" weight={600}>jour{streak > 1 ? 's' : ''} à 4★+</Text>
+          <Text size={11} color="muted" weight={600}>jour{streak > 1 ? 's' : ''} posté{streak > 1 ? 's' : ''} d’affilée</Text>
         </View>
       </Card>
 

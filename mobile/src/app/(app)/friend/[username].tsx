@@ -39,7 +39,7 @@ export default function FriendProfile() {
         <Text size={22} weight={800}>{p.first_name || p.username}</Text>
         <View style={{ flexDirection: 'row', gap: 24, marginTop: 6 }}>
           <View style={{ alignItems: 'center', gap: 4 }}>{p.scores.avg7 != null ? <Stars value={Number(p.scores.avg7)} size={16} /> : <Text color="muted">—</Text>}<Text size={11} color="muted" weight={600}>moyenne 7 jours</Text></View>
-          <View style={{ alignItems: 'center' }}><Text size={18} weight={800}>🔥 {p.scores.streak}</Text><Text size={11} color="muted" weight={600}>série à 4★+</Text></View>
+          <View style={{ alignItems: 'center' }}><Text size={18} weight={800}>🔥 {p.scores.streak}</Text><Text size={11} color="muted" weight={600}>jours postés d’affilée</Text></View>
           <View style={{ alignItems: 'center' }}><Text size={18} weight={800}>{p.friend_count}</Text><Text size={11} color="muted" weight={600}>amis</Text></View>
         </View>
       </Card>

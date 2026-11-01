@@ -1,4 +1,5 @@
-import { Alert, Switch, View } from 'react-native'
+import { useState } from 'react'
+import { Alert, Pressable, Switch, View } from 'react-native'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useData } from '@/state/data'
@@ -6,6 +7,7 @@ import { Button, Card, EmptyState, Header, MacroPills, Screen } from '@/componen
 import { Stars } from '@/components/ui/Stars'
 import { Text } from '@/components/ui/Text'
 import { photoGone } from '@/components/MealPhoto'
+import { PhotoViewer } from '@/components/PhotoViewer'
 import { useTheme } from '@/theme'
 import { usePhotoUrl } from '@/lib/usePhotoUrl'
 import { MEAL_TYPES, mealTypeOf } from '@/lib/logic/nutrition'
@@ -20,6 +22,7 @@ export default function MealDetail() {
   const meal = (dailyMeals[day] || []).find(m => m.id === id) ?? Object.values(dailyMeals).flat().find(m => m.id === id)
   const gone = meal ? photoGone(meal) : false
   const url = usePhotoUrl(meal && !gone ? meal.photoPath : null)
+  const [viewer, setViewer] = useState(false)
 
   if (!meal) return <Screen><Header title="Repas" onBack /><EmptyState emoji="🤷" title="Repas introuvable" /></Screen>
   const realDay = meal.time.slice(0, 10)
@@ -33,7 +36,12 @@ export default function MealDetail() {
     <Screen>
       <Header title={meal.name} subtitle={`${formatDay(realDay)} · ${MEAL_TYPES.find(t => t.id === mealTypeOf(meal))?.label}`} onBack />
       {url ? (
-        <Image source={{ uri: url }} accessibilityLabel={`Photo : ${meal.name}`} style={{ width: '100%', aspectRatio: 1, borderRadius: 28, backgroundColor: colors.muted }} contentFit="cover" transition={200} />
+        <>
+        <Pressable accessibilityRole="imagebutton" accessibilityLabel={`Photo : ${meal.name}. Toucher pour agrandir`} onPress={() => { haptics.tap(); setViewer(true) }}>
+          <Image source={{ uri: url }} style={{ width: '100%', aspectRatio: 1, borderRadius: 28, backgroundColor: colors.muted }} contentFit="cover" transition={200} />
+        </Pressable>
+        <PhotoViewer path={meal.photoPath} visible={viewer} onClose={() => setViewer(false)} label={`Photo : ${meal.name}`} />
+        </>
       ) : (
         <Card style={{ alignItems: 'center', gap: 6, paddingVertical: 28 }}>
           <Text size={64}>{meal.emoji}</Text>

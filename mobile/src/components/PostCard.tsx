@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { ActionSheetIOS, Alert, Platform, Pressable, View } from 'react-native'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
@@ -6,6 +6,7 @@ import { Avatar } from './Avatar'
 import { Card } from './ui/kit'
 import { Stars } from './ui/Stars'
 import { Text } from './ui/Text'
+import { PhotoViewer } from './PhotoViewer'
 import { useTheme } from '@/theme'
 import { usePhotoUrl } from '@/lib/usePhotoUrl'
 import { REACTIONS, timeOf, type FeedPost } from '@/lib/social'
@@ -27,6 +28,7 @@ export const PostCard = memo(function PostCard({ post, onReact, onHide, onReport
   const url = usePhotoUrl(post.photo_path)
   const label = MEAL_TYPES.find(t => t.id === post.meal_type)?.label ?? 'Repas'
   const who = post.first_name || post.username
+  const [viewer, setViewer] = useState(false)
 
   const menu = () => {
     haptics.tap()
@@ -55,9 +57,11 @@ export const PostCard = memo(function PostCard({ post, onReact, onHide, onReport
       </View>
 
       {post.photo_path ? (
-        <View style={{ width: '100%', aspectRatio: 1, backgroundColor: colors.muted }}>
-          {url ? <Image source={{ uri: url }} accessibilityLabel={`Photo : ${post.name}`} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={200} /> : null}
-        </View>
+        <Pressable accessibilityRole="imagebutton" accessibilityLabel={`Photo : ${post.name}. Toucher pour agrandir`} accessibilityHint="Ouvre la photo en grand" onPress={() => { haptics.tap(); setViewer(true) }}
+          style={{ width: '100%', aspectRatio: 1, backgroundColor: colors.muted }}>
+          {url ? <Image source={{ uri: url }} style={{ width: '100%', height: '100%' }} contentFit="cover" transition={200} /> : null}
+          <PhotoViewer path={post.photo_path} visible={viewer} onClose={() => setViewer(false)} label={`Photo : ${post.name}`} />
+        </Pressable>
       ) : (
         <View style={{ height: 120, backgroundColor: colors.nutriSoft, alignItems: 'center', justifyContent: 'center' }}><Text size={52}>{post.emoji}</Text></View>
       )}

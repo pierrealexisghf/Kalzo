@@ -80,9 +80,9 @@ export function dayStars(meals: Rated[]): number | null {
   return Math.round((rated.reduce((s, m) => s + (m.stars as number), 0) / rated.length) * 10) / 10
 }
 
-/** Série de jours consécutifs dont la moyenne est ≥ 4 étoiles (celle d'hier reste valable). */
-export function goodStreak(dailyMeals: Record<string, Rated[]>, today: string = todayKey(), min = 4): number {
-  const ok = (k: string) => { const s = dayStars(dailyMeals[k] || []); return s != null && s >= min }
+/** Série de jours consécutifs avec au moins un repas posté (une flamme = un jour posté). Celle d'hier reste valable. */
+export function postStreak(dailyMeals: Record<string, { shared?: boolean }[]>, today: string = todayKey()): number {
+  const ok = (k: string) => (dailyMeals[k] || []).some(m => m.shared)
   let key = ok(today) ? today : addDays(today, -1)
   let count = 0
   while (ok(key)) { count += 1; key = addDays(key, -1) }

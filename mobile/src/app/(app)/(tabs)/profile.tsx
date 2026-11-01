@@ -19,7 +19,7 @@ import { useToast } from '@/components/ui/Toast'
 import { TAB_BAR_HEIGHT } from '@/components/FloatingTabBar'
 import { useTheme } from '@/theme'
 import { PLAN_LABEL } from '@/lib/logic/quota'
-import { averageStars7d, goodStreak } from '@/lib/logic/score'
+import { averageStars7d, postStreak } from '@/lib/logic/score'
 import { overview, sharedMeals, type SharedMeal } from '@/lib/social'
 import * as haptics from '@/lib/haptics'
 
@@ -38,7 +38,7 @@ export default function Profile() {
   const username = account?.username
   const name = account?.first_name || username || ''
   const avg = averageStars7d(data.dailyMeals)
-  const streak = goodStreak(data.dailyMeals)
+  const streak = postStreak(data.dailyMeals)
 
   useEffect(() => {
     if (!focused || !username) return
@@ -111,7 +111,7 @@ export default function Profile() {
         <Text color="muted">@{username}</Text>
         <View style={{ flexDirection: 'row', gap: 26, marginTop: 10 }}>
           <View style={{ alignItems: 'center', gap: 4 }}>{avg != null ? <Stars value={avg} size={16} /> : <Text color="muted">—</Text>}<Text size={11} color="muted" weight={600}>moyenne 7 jours</Text></View>
-          <View style={{ alignItems: 'center' }}><Text size={18} weight={800}>🔥 {streak}</Text><Text size={11} color="muted" weight={600}>série à 4★+</Text></View>
+          <View style={{ alignItems: 'center' }}><Text size={18} weight={800}>🔥 {streak}</Text><Text size={11} color="muted" weight={600}>jours postés d’affilée</Text></View>
           <View style={{ alignItems: 'center' }}><Text size={18} weight={800}>{friends}</Text><Text size={11} color="muted" weight={600}>amis</Text></View>
         </View>
       </Card>

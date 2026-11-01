@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { calculateProfile, planWeightGoal, computeStreak, defaultMealType, suggestWaterGoal, fmtMl, sumMacros } from '../src/lib/logic/nutrition.ts'
 import { kcalForMet } from '../src/lib/logic/sport.ts'
-import { mealStars, mealScore, averageStars7d, goodStreak } from '../src/lib/logic/score.ts'
+import { mealStars, mealScore, averageStars7d, postStreak } from '../src/lib/logic/score.ts'
 import { effectivePlan, nextWeeklyReset, scansLeftLabel } from '../src/lib/logic/quota.ts'
 import { weekDatesOf, addDays } from '../src/lib/logic/dates.ts'
 
@@ -83,8 +83,14 @@ test('score de profil : moyenne 7 jours et série ≥ 4 étoiles', () => {
     '2026-09-01': [{ stars: 1 }], // hors fenêtre
   }
   assert.equal(averageStars7d(d, '2026-10-10'), 3.8) // (5+4+4+2)/4 = 3,75 → 3,8
-  assert.equal(goodStreak(d, '2026-10-10'), 2)
   assert.equal(averageStars7d({}, '2026-10-10'), null)
+})
+test('flammes : un jour posté = une flamme, peu importe la note', () => {
+  const m = (shared: boolean) => ({ shared })
+  const d = { '2026-10-10': [m(true)], '2026-10-09': [m(true), m(false)], '2026-10-08': [m(false)], '2026-10-07': [m(true)] }
+  assert.equal(postStreak(d, '2026-10-10'), 2) // le 08 n'est pas posté : la série s'arrête
+  assert.equal(postStreak(d, '2026-10-11'), 2) // aujourd'hui pas encore posté : la veille compte
+  assert.equal(postStreak({ '2026-10-08': [m(true)] }, '2026-10-10'), 0) // avant-hier : série perdue
 })
 
 // ------------------------------------------------------------------- offres
