@@ -4,7 +4,7 @@ export const metadata = { title: "Conditions générales d'utilisation", alterna
 
 export default function CGU() {
   return (
-    <LegalPage title="Conditions générales d'utilisation" updated="11 octobre 2026">
+    <LegalPage title="Conditions générales d'utilisation" updated="30 octobre 2026">
       <H2>1. Objet</H2>
       <P>
         Les présentes conditions régissent l'accès et l'utilisation de Kalzo, application de suivi
@@ -13,7 +13,13 @@ export default function CGU() {
         ou utiliser le service vaut acceptation.
       </P>
 
-      <H2>2. Compte et âge</H2>
+      <H2>2. Compte, pseudo et âge</H2>
+      <P>
+        L'accès nécessite un compte personnel et un <strong>pseudo</strong> unique (3 à 20 caractères),
+        visible des autres utilisateurs ; votre adresse e-mail ne l'est jamais. Le pseudo peut être
+        modifié une fois tous les 30 jours. Les pseudos usurpant une identité, injurieux ou trompeurs
+        peuvent être refusés ou retirés.
+      </P>
       <P>
         L'accès nécessite un compte personnel. Le service est réservé aux personnes de{' '}
         <strong>15 ans et plus</strong>. Chacun est responsable de la confidentialité de ses
@@ -23,12 +29,13 @@ export default function CGU() {
 
       <H2>3. Le service</H2>
       <UL items={[
-        'Gratuit : journal des repas, suivi du sport, de l’hydratation et du poids, recherche d’aliments, recettes, objectifs.',
-        'Avec crédits IA : analyse de repas par photo ou texte, recettes « Frigo Vide », analyse de carte de restaurant, plan sur 7 jours, batch cooking, estimation d’une séance de sport.',
+        'Gratuit et illimité : feed et amis, étoiles, journal « souvenirs », saisie manuelle des repas, suivi du sport, de l’hydratation et du poids, recherche d’aliments, recettes, rappels.',
+        'Scans IA : analyse d’un repas par photo ou texte, estimation d’une séance de sport décrite. 7 jours illimités à l’inscription, puis un quota hebdomadaire selon l’offre.',
+        'Coach IA : recettes « Frigo Vide », analyse de carte de restaurant, plan sur 7 jours, batch cooking, pendant l’essai et avec les offres Plus et Illimité.',
       ]} />
       <P>
-        Un compte reçoit 10 crédits IA offerts à l'inscription, sans carte bancaire. Des crédits
-        supplémentaires sont disponibles par abonnement, dans les conditions des{' '}
+        Chaque compte bénéficie d'un essai de 7 jours, sans carte bancaire. Les offres payantes sont
+        souscrites dans l'application via la boutique d'applications, dans les conditions des{' '}
         <A href="/cgv">conditions générales de vente</A>.
       </P>
 
@@ -58,6 +65,22 @@ export default function CGU() {
         anormal de demandes d'IA), après information de l'intéressé sauf urgence.
       </P>
 
+      <H2>5 bis. Contenus partagés, amis et modération</H2>
+      <P>
+        Vous pouvez partager vos repas (photo, nom, étoiles, protéines, glucides, lipides — jamais les
+        calories) avec vos amis. Un ami est une personne dont vous avez accepté la demande, et inversement :
+        rien n'est visible d'un utilisateur qui n'est pas votre ami. Vous restez responsable de ce que vous
+        publiez ou commentez, et vous vous engagez à ne diffuser aucun contenu illicite, haineux,
+        harcelant, sexuellement explicite, portant atteinte à la vie privée ou aux droits de tiers, ni de
+        photographies de personnes sans leur accord. Les photos sont conservées <strong>30 jours</strong>
+        puis supprimées automatiquement.
+      </P>
+      <UL items={[
+        'Vous pouvez signaler un repas ou un commentaire, masquer un repas, bloquer un utilisateur ou supprimer vos publications à tout moment.',
+        'Un utilisateur bloqué ne peut plus vous trouver, vous écrire ni voir vos publications.',
+        'L’éditeur examine les signalements dans un délai raisonnable et peut supprimer un contenu, suspendre ou clore le compte de l’auteur d’un contenu manifestement illicite ou abusif.',
+      ]} />
+
       <H2>6. Disponibilité</H2>
       <P>
         L'éditeur s'efforce d'assurer un service continu, sans garantie absolue. Des interruptions
@@ -71,13 +94,15 @@ export default function CGU() {
         peuvent révéler des informations de santé. Elles ne sont traitées qu'avec votre consentement
         explicite, recueilli à l'inscription, et uniquement pour faire fonctionner le service. Le détail,
         vos droits, et la possibilité de télécharger ou supprimer vos données à tout moment depuis
-        « Moi » figurent dans la <A href="/confidentialite">politique de confidentialité</A>.
+        « Profil » figurent dans la <A href="/confidentialite">politique de confidentialité</A>.
       </P>
 
       <H2>8. Suppression du compte</H2>
       <P>
-        Vous pouvez supprimer votre compte à tout moment depuis « Moi » → « Supprimer mon compte ».
-        Vos données et votre abonnement éventuel sont alors effacés, sans retour possible.
+        Vous pouvez supprimer votre compte à tout moment depuis l'application : « Profil » → « Supprimer mon
+        compte ». Vos données, vos photos, vos amitiés et vos commentaires sont alors effacés, sans retour
+        possible. Un abonnement acheté via Apple ou Google doit aussi être résilié dans les réglages de la
+        boutique (voir les <A href="/cgv">CGV</A>).
       </P>
 
       <H2>9. Propriété intellectuelle</H2>
