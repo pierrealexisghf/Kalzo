@@ -123,6 +123,7 @@ export default function Profile() {
       <Group>
         <Row icon="people-outline" title="Mes amis" onPress={() => router.push('/friends')} />
         <Row icon="at" title="Modifier mon pseudo" value={`@${username}`} onPress={() => router.push('/settings/username')} />
+        <Row icon="key-outline" title="Modifier mon mot de passe" onPress={() => router.push('/settings/password')} />
         <Row icon="flag-outline" title="Objectifs et profil nutritionnel" value={data.profile ? `${data.profile.kcal} kcal` : undefined} onPress={() => router.push('/settings/goals')} />
         <Row icon="notifications-outline" title="Notifications et rappels" onPress={() => router.push('/settings/notifications')} />
         <Row icon="ban-outline" title="Utilisateurs bloqués" onPress={() => router.push('/settings/blocked')} />
