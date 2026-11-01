@@ -4,7 +4,7 @@ import { calculateProfile, planWeightGoal, computeStreak, defaultMealType, sugge
 import { kcalForMet } from '../src/lib/logic/sport.ts'
 import { mealStars, mealScore, averageStars7d, postStreak } from '../src/lib/logic/score.ts'
 import { effectivePlan, nextWeeklyReset, scansLeftLabel } from '../src/lib/logic/quota.ts'
-import { weekDatesOf, addDays } from '../src/lib/logic/dates.ts'
+import { weekDatesOf, addDays, cardSlot } from '../src/lib/logic/dates.ts'
 
 test('profil : Mifflin-St Jeor, macros cohérentes, plancher calorique', () => {
   const p = calculateProfile({ weight: 70, height: 175, age: 30, gender: 'male', activity: 1.3, goal: 'maintenance' })
@@ -122,4 +122,13 @@ test('semaine lundi → dimanche', () => {
   assert.equal(w[0], '2026-10-26')
   assert.equal(w[6], '2026-11-01')
   assert.equal(addDays('2026-10-31', 1), '2026-11-01')
+})
+
+test('cadre du feed : déjeuner entre les rappels, dîner du soir jusqu’au midi suivant', () => {
+  const at = (h: number, m: number) => new Date(2026, 10, 2, h, m)
+  assert.deepEqual(cardSlot(at(11, 0), '12:15', '19:30'), { slot: 'diner', yesterday: true })
+  assert.deepEqual(cardSlot(at(12, 15), '12:15', '19:30'), { slot: 'dejeuner', yesterday: false })
+  assert.deepEqual(cardSlot(at(19, 29), '12:15', '19:30'), { slot: 'dejeuner', yesterday: false })
+  assert.deepEqual(cardSlot(at(19, 30), '12:15', '19:30'), { slot: 'diner', yesterday: false })
+  assert.deepEqual(cardSlot(at(2, 0), '12:15', '19:30'), { slot: 'diner', yesterday: true })
 })

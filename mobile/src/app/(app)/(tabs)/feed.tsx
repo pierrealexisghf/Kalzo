@@ -12,7 +12,8 @@ import { PostCard } from '@/components/PostCard'
 import { TAB_BAR_HEIGHT } from '@/components/FloatingTabBar'
 import { useTheme } from '@/theme'
 import { blockUser, feedPage, hideMeal, overview, react, reportMeal, type FeedPost } from '@/lib/social'
-import { todayKey } from '@/lib/logic/dates'
+import { addDays, cardSlot, localTimestamp, todayKey } from '@/lib/logic/dates'
+import { DEFAULT_REMINDERS, loadReminders } from '@/lib/reminders'
 import * as haptics from '@/lib/haptics'
 
 const PAGE = 12
@@ -24,6 +25,14 @@ export default function Feed() {
   const toast = useToast()
   const focused = useIsFocused()
   const { dailyMeals } = useData()
+  const [times, setTimes] = useState(DEFAULT_REMINDERS.times)
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    if (!focused) return
+    loadReminders().then(r => setTimes(r.times))
+    const t = setInterval(() => setNow(new Date()), 60_000)
+    return () => clearInterval(t)
+  }, [focused])
   const [posts, setPosts] = useState<FeedPost[] | null>(null)
   const [done, setDone] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -85,10 +94,14 @@ export default function Feed() {
   ]), [toast])
 
   // Carte « Tu n'as pas encore posté ton déjeuner / dîner » : ouvre directement la caméra.
-  const hour = new Date().getHours()
-  const today = dailyMeals[todayKey()] || []
-  const slot = hour >= 10 && hour < 16 ? 'dejeuner' : hour >= 17 ? 'diner' : null
-  const posted = slot ? today.some(m => m.shared && m.mealType === slot) : true
+  const slotInfo = cardSlot(now, times.dejeuner, times.diner)
+  const slot = slotInfo.slot
+  const cardDay = dailyMeals[slotInfo.yesterday ? addDays(todayKey(), -1) : todayKey()] || []
+  // Le repas du créneau est « posté » s'il est partagé et soit de ce type, soit publié depuis l'heure du rappel.
+  const [hh, mm] = (slot === 'diner' ? times.diner : times.dejeuner).split(':').map(Number)
+  const windowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (slotInfo.yesterday ? 1 : 0), hh, mm)
+  const since = localTimestamp(windowStart)
+  const posted = cardDay.some(m => m.shared && (m.mealType === slot || (m.time ?? '') >= since))
   const slotLabel = slot === 'dejeuner' ? 'déjeuner' : 'dîner'
 
   const header = (

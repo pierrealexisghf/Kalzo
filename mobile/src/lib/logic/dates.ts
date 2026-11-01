@@ -69,3 +69,12 @@ export function getGreeting(now: Date = new Date()): string {
   if (h < 18) return 'Bon après-midi'
   return 'Bonsoir'
 }
+
+/** Quel repas rappeler dans le feed : le déjeuner entre les rappels de midi et du soir, le dîner du rappel du soir jusqu'au rappel de midi du lendemain. */
+export function cardSlot(now: Date, lunch: string, dinner: string): { slot: 'dejeuner' | 'diner'; yesterday: boolean } {
+  const mins = (hhmm: string) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + (m || 0) }
+  const t = now.getHours() * 60 + now.getMinutes()
+  if (t >= mins(dinner)) return { slot: 'diner', yesterday: false }
+  if (t >= mins(lunch)) return { slot: 'dejeuner', yesterday: false }
+  return { slot: 'diner', yesterday: true }
+}
