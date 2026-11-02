@@ -61,7 +61,11 @@ export async function buy(pkg: PurchasesPackage): Promise<'ok' | 'cancelled'> {
     throw e
   }
 }
-export async function restore() { await Purchases.restorePurchases() }
+/** Renvoie true si au moins un abonnement est actif chez Apple après la restauration. */
+export async function restore(): Promise<boolean> {
+  const info = await Purchases.restorePurchases()
+  return Object.keys(info.entitlements.active).length > 0
+}
 /** Feuille Apple de saisie d'un code promo (iOS). Le plan est mis à jour ensuite par le webhook RevenueCat. */
 export async function redeemCode() { await Purchases.presentCodeRedemptionSheet() }
 

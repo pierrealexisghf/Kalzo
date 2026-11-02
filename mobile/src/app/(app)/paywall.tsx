@@ -67,7 +67,10 @@ export default function Paywall() {
   }
   const doRestore = async () => {
     setBusy(true)
-    try { await restore(); await waitForActivation(); toast.show('Achats restaurés', 'success') } catch { toast.show('Aucun achat à restaurer.', 'error') }
+    try {
+      if (!(await restore())) toast.show('Aucun achat à restaurer.', 'info')
+      else { await waitForActivation(); toast.show('Achats restaurés', 'success') }
+    } catch { toast.show('La restauration a échoué. Réessaie dans un instant.', 'error') }
     setBusy(false)
   }
 
