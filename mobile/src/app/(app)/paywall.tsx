@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/Toast'
 import { ScanBalance } from '@/components/ScanBalance'
 import { radius, useTheme } from '@/theme'
 import {
-  DEFAULT_PRICES, DURATIONS, MANAGE_URL, PAID_PLANS, PLAN_INFO, buy, findPackage, fmtEur, loadPackages, purchasesAvailable, redeemCode, restore, savingPct,
+  DEFAULT_PRICES, DURATIONS, PAID_PLANS, PLAN_INFO, buy, findPackage, fmtEur, loadPackages, manageSubscriptions, purchasesAvailable, redeemCode, restore, savingPct,
   type Duration, type PaidPlan,
 } from '@/lib/purchases'
 import * as haptics from '@/lib/haptics'
@@ -127,7 +127,7 @@ export default function Paywall() {
         <Text size={12.5} weight={700} color="primary" onPress={() => Linking.openURL(`${SITE}/cgu`)}>Conditions d’utilisation</Text>
         <Text size={12.5} weight={700} color="primary" onPress={() => Linking.openURL(`${SITE}/confidentialite`)}>Confidentialité</Text>
       </View>
-      {Platform.OS === 'ios' ? <Button label="Gérer mon abonnement" variant="ghost" size="sm" onPress={() => Linking.openURL(MANAGE_URL)} /> : null}
+      {Platform.OS === 'ios' ? <Button label="Gérer mon abonnement" variant="ghost" size="sm" onPress={() => { manageSubscriptions() }} /> : null}
     </Screen>
   )
 }

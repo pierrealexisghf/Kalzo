@@ -1,4 +1,4 @@
-import { Platform } from 'react-native'
+import { Linking, Platform } from 'react-native'
 import Purchases, { type PurchasesPackage } from 'react-native-purchases'
 
 // Achats intégrés Apple via RevenueCat. Un seul groupe d'abonnements : 2 offres × 2 durées = 4 produits au lancement.
@@ -70,3 +70,8 @@ export async function restore(): Promise<boolean> {
 export async function redeemCode() { await Purchases.presentCodeRedemptionSheet() }
 
 export const MANAGE_URL = 'https://apps.apple.com/account/subscriptions'
+
+/** Écran natif de gestion des abonnements (sait aussi afficher les achats de test) ; à défaut, la page web d'Apple. */
+export async function manageSubscriptions() {
+  try { await Purchases.showManageSubscriptions() } catch { await Linking.openURL(MANAGE_URL) }
+}
