@@ -1,4 +1,4 @@
-import { Linking, Platform, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSession } from '@/state/session'
 import { Button, Card, Header, Screen } from '@/components/ui/kit'
