@@ -4,7 +4,7 @@ import { useSession } from '@/state/session'
 import { Button, Card, Header, Screen } from '@/components/ui/kit'
 import { Text } from '@/components/ui/Text'
 import { ScanBalance } from '@/components/ScanBalance'
-import { MANAGE_URL } from '@/lib/purchases'
+import { MANAGE_URL, purchasesAvailable, redeemCode } from '@/lib/purchases'
 import { PLAN_LABEL, type PlanId } from '@/lib/logic/quota'
 import { dateKey, formatDay } from '@/lib/logic/dates'
 
@@ -30,6 +30,7 @@ export default function Subscription() {
       </Card>
       <Button label={plan === 'free' || plan === 'trial' ? 'Voir les offres' : 'Changer d’offre'} size="lg" onPress={() => router.push('/paywall')} />
       {Platform.OS === 'ios' ? <Button label="Gérer mon abonnement" variant="outline" onPress={() => Linking.openURL(MANAGE_URL)} /> : null}
+      {Platform.OS === 'ios' && purchasesAvailable() ? <Button label="J’ai un code promo" variant="ghost" onPress={() => { redeemCode().catch(() => {}) }} /> : null}
       <Text size={12} color="muted" center>Le feed, les amis, les étoiles, le journal, la saisie manuelle, l’eau, le sport, le poids et les rappels sont gratuits et illimités.</Text>
     </Screen>
   )

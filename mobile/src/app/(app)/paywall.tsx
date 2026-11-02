@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/Toast'
 import { ScanBalance } from '@/components/ScanBalance'
 import { radius, useTheme } from '@/theme'
 import {
-  DEFAULT_PRICES, DURATIONS, MANAGE_URL, PAID_PLANS, PLAN_INFO, buy, findPackage, fmtEur, loadPackages, purchasesAvailable, restore, savingPct,
+  DEFAULT_PRICES, DURATIONS, MANAGE_URL, PAID_PLANS, PLAN_INFO, buy, findPackage, fmtEur, loadPackages, purchasesAvailable, redeemCode, restore, savingPct,
   type Duration, type PaidPlan,
 } from '@/lib/purchases'
 import * as haptics from '@/lib/haptics'
@@ -71,6 +71,12 @@ export default function Paywall() {
     setBusy(false)
   }
 
+  const doRedeem = async () => {
+    setBusy(true)
+    try { await redeemCode(); await waitForActivation() } catch { toast.show('Impossible d’ouvrir la saisie du code.', 'error') }
+    setBusy(false)
+  }
+
   const store = Platform.OS === 'ios' ? 'ton compte Apple' : 'ton compte Google'
   return (
     <Screen>
@@ -109,6 +115,7 @@ export default function Paywall() {
 
       <Button label={`Choisir ${PLAN_INFO[selected].name} · ${label(selected, duration)}`} size="lg" onPress={subscribe} loading={busy} />
       <Button label="Restaurer mes achats" variant="ghost" onPress={doRestore} disabled={busy} />
+      {Platform.OS === 'ios' && purchasesAvailable() ? <Button label="J’ai un code promo" variant="ghost" onPress={doRedeem} disabled={busy} /> : null}
       <Text size={11.5} color="muted" center>
         L’abonnement est facturé via {store} et se renouvelle automatiquement à la fin de chaque période, sauf résiliation au moins 24 h avant. Tu peux le gérer ou le résilier à tout moment dans les réglages de {Platform.OS === 'ios' ? 'ton compte Apple (Réglages › ton nom › Abonnements)' : 'Google Play'}. Le paiement est débité à la confirmation de l’achat.
       </Text>

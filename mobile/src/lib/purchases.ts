@@ -62,5 +62,7 @@ export async function buy(pkg: PurchasesPackage): Promise<'ok' | 'cancelled'> {
   }
 }
 export async function restore() { await Purchases.restorePurchases() }
+/** Feuille Apple de saisie d'un code promo (iOS). Le plan est mis à jour ensuite par le webhook RevenueCat. */
+export async function redeemCode() { await Purchases.presentCodeRedemptionSheet() }
 
 export const MANAGE_URL = 'https://apps.apple.com/account/subscriptions'
