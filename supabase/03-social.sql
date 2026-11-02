@@ -157,7 +157,7 @@ create table if not exists public.ai_usage (
   primary key (user_id, day)
 );
 
--- Offre effective : essai en cours > abonnement actif > gratuit.
+-- Offre effective : abonnement actif > essai en cours > gratuit.
 -- Les anciens abonnés Stripe gardent leur accès : standard → plus, vip → illimite.
 create or replace function public._effective_plan(p_user uuid)
 returns text language plpgsql stable security definer set search_path = public, pg_temp as $$
@@ -166,16 +166,16 @@ begin
   select plan, subscription_status, current_period_end, app_trial_ends_at
     into r from public.profiles where id = p_user;
   if not found then return 'free'; end if;
-  if r.app_trial_ends_at is not null and r.app_trial_ends_at > now() then return 'trial'; end if;
   v_plan := case r.plan when 'standard' then 'plus' when 'vip' then 'illimite' else r.plan end;
+  -- Un abonnement actif passe avant l'essai : on voit son offre dès l'achat.
   if v_plan in ('essentiel', 'plus', 'illimite')
      and r.subscription_status in ('active', 'trialing', 'cancelling', 'past_due') then
-    if r.subscription_status = 'cancelling' and r.current_period_end is not null
-       and r.current_period_end <= now() then
-      return 'free';
+    if not (r.subscription_status = 'cancelling' and r.current_period_end is not null
+            and r.current_period_end <= now()) then
+      return v_plan;
     end if;
-    return v_plan;
   end if;
+  if r.app_trial_ends_at is not null and r.app_trial_ends_at > now() then return 'trial'; end if;
   return 'free';
 end $$;
 
