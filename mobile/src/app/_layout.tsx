@@ -9,6 +9,7 @@ import {
 } from '@expo-google-fonts/geist'
 import { ThemeProvider, useTheme } from '@/theme'
 import { ToastProvider } from '@/components/ui/Toast'
+import { AiConsentProvider } from '@/components/AiConsent'
 import { SessionProvider, useSession } from '@/state/session'
 import { DataProvider, useData } from '@/state/data'
 import { useAuthLinks } from '@/lib/deeplinks'
@@ -107,9 +108,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider>
           <ToastProvider>
-            <SessionProvider>
-              <KeyedData />
-            </SessionProvider>
+            <AiConsentProvider>
+              <SessionProvider>
+                <KeyedData />
+              </SessionProvider>
+            </AiConsentProvider>
           </ToastProvider>
         </ThemeProvider>
       </SafeAreaProvider>

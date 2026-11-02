@@ -16,6 +16,7 @@ import { Card, Screen, SectionTitle, Segmented } from '@/components/ui/kit'
 import { Stars } from '@/components/ui/Stars'
 import { Text } from '@/components/ui/Text'
 import { useToast } from '@/components/ui/Toast'
+import { useAiConsent } from '@/components/AiConsent'
 import { TAB_BAR_HEIGHT } from '@/components/FloatingTabBar'
 import { useTheme } from '@/theme'
 import { PLAN_LABEL } from '@/lib/logic/quota'
@@ -29,6 +30,16 @@ export default function Profile() {
   const { pref, setPref, colors } = useTheme()
   const router = useRouter()
   const toast = useToast()
+  const aiConsent = useAiConsent()
+  const [aiOk, setAiOk] = useState<boolean | null>(null)
+  useEffect(() => { aiConsent.granted().then(setAiOk).catch(() => {}) }, [aiConsent])
+  const toggleAi = () => {
+    if (!aiOk) { aiConsent.ensure().then(setAiOk).catch(() => {}); return }
+    Alert.alert('Retirer mon accord ?', 'Les scans de repas et le coach IA seront désactivés tant que tu n’auras pas accepté à nouveau. Tu peux toujours saisir tes repas à la main.', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Retirer', style: 'destructive', onPress: () => { aiConsent.revoke().then(() => setAiOk(false)).catch(() => {}) } },
+    ])
+  }
   const focused = useIsFocused()
   const { user, account, signOut } = useSession()
   const data = useData()
@@ -144,6 +155,7 @@ export default function Profile() {
 
       <SectionTitle>Mes données</SectionTitle>
       <Group>
+        <Row icon="sparkles-outline" title="Analyse par IA (Anthropic)" value={aiOk == null ? undefined : aiOk ? 'Accordée' : 'Non accordée'} onPress={toggleAi} />
         <Row icon="download-outline" title="Exporter mes données" onPress={exportData} />
         <Row icon="log-out-outline" title="Me déconnecter" onPress={signOut} />
         <Row icon="trash-outline" title="Supprimer mon compte" onPress={deleteAccount} danger last />
