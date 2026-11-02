@@ -47,7 +47,7 @@ export default function MealValidate() {
   const router = useRouter()
   const toast = useToast()
   const runAi = useAiCall()
-  const { mode, mealType: mt, day: dayParam } = useLocalSearchParams<{ mode: 'scan' | 'manual'; mealType?: string; day?: string }>()
+  const { mode, mealType: mt, day: dayParam } = useLocalSearchParams<{ mode: 'scan' | 'manual' | 'describe'; mealType?: string; day?: string }>()
   const day = dayParam || todayKey()
   const { addMeal, profile } = useData()
   const draft = useDraft()
@@ -133,7 +133,7 @@ export default function MealValidate() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Screen>
-        <Header title={mode === 'scan' ? 'Ton repas' : 'Valider le repas'} onBack={() => { resetDraft(); router.back() }} />
+        <Header title={mode === 'scan' ? 'Ton repas' : mode === 'describe' && !base ? 'Décrire mon plat' : 'Valider le repas'} onBack={() => { resetDraft(); router.back() }} />
 
         {photoUri ? (
           <Image source={{ uri: photoUri }} accessibilityLabel="Photo du repas" style={{ width: '100%', aspectRatio: 4 / 3, borderRadius: 24, backgroundColor: colors.muted }} contentFit="cover" />
@@ -150,10 +150,12 @@ export default function MealValidate() {
           </Card>
         ) : failed || !base ? (
           <Card style={{ gap: 12 }}>
-            <Text weight={800} size={17}>L’analyse n’a pas abouti</Text>
-            <Text color="muted" size={14}>Ajoute une description pour aider l’IA, ou saisis les valeurs toi-même (gratuit).</Text>
+            <Text weight={800} size={17}>{mode === 'describe' && !failed ? 'Décris ce que tu as mangé' : 'L’analyse n’a pas abouti'}</Text>
+            <Text color="muted" size={14}>{mode === 'describe' && !failed
+              ? 'Plat, quantités, sauces : plus c’est précis, meilleure est l’estimation. Une photo est facultative.'
+              : 'Ajoute une description pour aider l’IA, ou saisis les valeurs toi-même (gratuit).'}</Text>
             <Input value={description} onChangeText={setDescription} placeholder="Ex : assiette de poulet grillé, 150 g de riz et salade" multiline maxLength={1500} />
-            <Button label="Réessayer avec la description" variant="tone" tone="coach" onPress={() => analyze(description)} disabled={!description.trim() && !photoUri} />
+            <Button label={mode === 'describe' && !failed ? 'Estimer avec l’IA' : 'Réessayer avec la description'} variant="tone" tone="coach" onPress={() => analyze(description)} disabled={!description.trim() && !photoUri} loading={analyzing} />
             <Button label="Saisir à la main" variant="outline" onPress={() => { resetDraft(); router.replace('/meal-manual') }} />
             <ScanBalance />
           </Card>

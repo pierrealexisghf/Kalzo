@@ -104,6 +104,7 @@ export default function AddSheet() {
         <BigAction tone="coach" icon="camera" title="Scanner avec une photo" text="L’IA estime les valeurs · 1 scan" onPress={() => { resetDraft(); go({ pathname: '/capture', params: { mealType: defaultMealType() } }) }}>
           <View style={{ marginTop: 4 }}><ScanBalance compact /></View>
         </BigAction>
+        <BigAction tone="coach" icon="chatbubble-ellipses" title="Décrire mon plat" text="Écris ce que tu as mangé, l’IA estime · 1 scan" onPress={() => { resetDraft(); go({ pathname: '/meal-validate', params: { mode: 'describe', mealType: defaultMealType() } }) }} />
         <BigAction tone="nutri" icon="create" title="Saisie manuelle" text="Recherche, repas rapide, récents · gratuit" onPress={() => { resetDraft(); go('/meal-manual') }} />
       </View>
     )
@@ -127,7 +128,7 @@ export default function AddSheet() {
   return (
     <View style={{ padding: 20, gap: 12 }}>
       <Text size={24} weight={800}>Ajouter</Text>
-      <BigAction tone="nutri" icon="restaurant" title="Repas" text="Photo ou saisie manuelle" onPress={() => setView('meal')} />
+      <BigAction tone="nutri" icon="restaurant" title="Repas" text="Photo, description ou saisie manuelle" onPress={() => setView('meal')} />
       <BigAction tone="sport" icon="barbell" title="Sport" text="Rapide, manuel ou décrit à l’IA" onPress={() => go('/sport-add')} />
       <BigAction tone="water" icon="water" title="Hydratation" text={`+${WATER_STEP} ml en un tap · appui long : autres quantités`}
         onPress={() => drink(WATER_STEP)} onLongPress={() => { haptics.select(); setPicker(p => !p) }}>
