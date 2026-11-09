@@ -55,9 +55,9 @@ export default function Capture() {
     return (
       <View style={{ flex: 1, backgroundColor: '#0b1410', padding: 28, justifyContent: 'center', gap: 14 }}>
         <Text size={56} center>📸</Text>
-        <Text size={24} weight={800} center color="white">Autorise l’appareil photo</Text>
+        <Text size={24} weight={800} center color="white">Photographie tes repas</Text>
         <Text center style={{ color: '#b8c7bf' }}>Kalzo l’utilise uniquement pour photographier tes repas. Tes photos restent privées et ne sont partagées qu’avec les amis que tu choisis.</Text>
-        <Button label={permission.canAskAgain ? 'Autoriser' : 'Ouvrir les réglages'} size="lg"
+        <Button label={permission.canAskAgain ? 'Continuer' : 'Ouvrir les réglages'} size="lg"
           onPress={() => (permission.canAskAgain ? requestPermission() : Linking.openSettings())} />
         <Button label="Choisir dans ma photothèque" variant="outline" onPress={gallery} />
         <Button label="Annuler" variant="ghost" onPress={() => router.back()} />

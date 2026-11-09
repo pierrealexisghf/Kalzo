@@ -99,8 +99,8 @@ export default function MealManual() {
           <CameraView style={StyleSheet.absoluteFill} facing="back" barcodeScannerSettings={{ barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e'] }} onBarcodeScanned={e => onCode(e.data)} />
         ) : (
           <View style={{ flex: 1, padding: 28, justifyContent: 'center', gap: 12 }}>
-            <Text color="white" center size={18} weight={700}>Autorise l’appareil photo pour scanner un code-barres.</Text>
-            <Button label="Autoriser" onPress={requestPermission} />
+            <Text color="white" center size={18} weight={700}>Pour scanner un code-barres, Kalzo a besoin de l’appareil photo.</Text>
+            <Button label="Continuer" onPress={requestPermission} />
           </View>
         )}
         <View pointerEvents="none" style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
