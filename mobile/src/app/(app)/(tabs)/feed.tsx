@@ -133,7 +133,7 @@ export default function Feed() {
           keyExtractor={p => p.id}
           renderItem={({ item }) => <View style={{ paddingBottom: 14 }}><PostCard post={item} onReact={onReact} onHide={onHide} onReport={onReport} onBlock={onBlock} /></View>}
           ListHeaderComponent={header}
-          ListEmptyComponent={<EmptyState emoji="🍽️" title="Le feed est encore vide" text="Poste ton premier repas, ou ajoute des amis pour voir ce qu’ils mangent." action={<Button label="Trouver des amis" onPress={() => router.push('/friends')} />} />}
+          ListEmptyComponent={<EmptyState emoji="🍽️" title="Le feed est vide pour l’instant" text="Poste ton repas, ou ajoute des amis pour voir ce qu’ils mangent. Les repas restent 48 h dans le fil." action={<Button label="Trouver des amis" onPress={() => router.push('/friends')} />} />}
           ListFooterComponent={loadingMore ? <Skeleton height={80} radius={24} /> : null}
           onEndReached={more}
           onEndReachedThreshold={0.6}

@@ -45,7 +45,7 @@ export default function MealDetail() {
       ) : (
         <Card style={{ alignItems: 'center', gap: 6, paddingVertical: 28 }}>
           <Text size={64}>{meal.emoji}</Text>
-          {gone ? <Text size={13} color="muted" center>Photo supprimée après 30 jours</Text> : null}
+          {gone ? <Text size={13} color="muted" center>{meal.shared ? 'Photo supprimée après 7 jours' : 'Photo supprimée après 30 jours'}</Text> : null}
         </Card>
       )}
       <Card style={{ gap: 14 }}>

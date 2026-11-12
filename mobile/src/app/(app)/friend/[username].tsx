@@ -44,6 +44,7 @@ export default function FriendProfile() {
         </View>
       </Card>
       <SectionTitle>Repas partagés</SectionTitle>
+      <Text size={12} color="muted">Les repas postés restent 7 jours sur le profil.</Text>
       <PostGrid meals={meals} />
       {!p.self ? (
         <View style={{ gap: 8, marginTop: 8 }}>

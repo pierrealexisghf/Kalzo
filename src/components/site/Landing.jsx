@@ -26,7 +26,7 @@ const PLANS = [
 
 const FAQ = [
   ['Les calories sont-elles visibles par mes amis ?', 'Non. Tes amis voient la photo, la note en étoiles et les protéines, glucides et lipides. Tes calories restent privées, dans ton journal.'],
-  ['Combien de temps mes photos sont-elles conservées ?', '30 jours. Ensuite elles sont supprimées automatiquement ; le repas, ses valeurs et ses étoiles restent dans ton journal.'],
+  ['Combien de temps mes repas postés restent-ils visibles ?', 'Un repas posté reste 48 h dans le fil de tes amis et 7 jours sur ton profil, puis il disparaît avec sa photo, ses réactions et ses commentaires. Il reste dans ton journal privé avec ses valeurs et ses étoiles (les photos d’un repas non posté sont gardées 30 jours).'],
   ['Qui peut voir mes repas ?', 'Uniquement les amis dont tu as accepté la demande, et seulement les repas que tu choisis de partager. Tu peux masquer, signaler ou bloquer à tout moment.'],
   ['Qu’est-ce qu’un « scan » ?', 'Une estimation par IA lancée depuis le bouton + : l’analyse d’un repas (photo ou texte) ou d’une séance de sport décrite. La saisie manuelle et le calcul du sport par MET sont gratuits et illimités.'],
   ['Que se passe-t-il après les 7 jours d’essai ?', 'Tu repasses automatiquement au plan gratuit (5 scans par semaine), sans aucun prélèvement. Tout ce qui est social et le suivi restent gratuits.'],

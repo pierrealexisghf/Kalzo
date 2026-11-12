@@ -210,7 +210,9 @@ export default function MealValidate() {
               </View>
               <Switch value={shared} onValueChange={v => { setShared(v); setSharedTouched(true); haptics.select() }} accessibilityLabel="Partager avec mes amis" trackColor={{ true: colors.primary }} />
             </Card>
-            {photoUri ? <Text size={12} color="muted" center>Tes photos sont conservées 30 jours, puis supprimées. Le repas et ses étoiles restent dans ton journal.</Text> : null}
+            {shared
+              ? <Text size={12} color="muted" center>Ton repas reste 48 h dans le fil et 7 jours sur ton profil, puis il disparaît avec sa photo, ses réactions et ses commentaires. Il reste dans ton journal avec ses valeurs et ses étoiles.</Text>
+              : photoUri ? <Text size={12} color="muted" center>Tes photos sont conservées 30 jours, puis supprimées. Le repas et ses étoiles restent dans ton journal.</Text> : null}
             <Button label={shared ? 'Publier' : 'Ajouter au journal'} size="lg" onPress={save} loading={saving} />
           </>
         ) : null}
