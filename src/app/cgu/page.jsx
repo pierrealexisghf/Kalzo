@@ -72,8 +72,8 @@ export default function CGU() {
         rien n'est visible d'un utilisateur qui n'est pas votre ami. Vous restez responsable de ce que vous
         publiez ou commentez, et vous vous engagez à ne diffuser aucun contenu illicite, haineux,
         harcelant, sexuellement explicite, portant atteinte à la vie privée ou aux droits de tiers, ni de
-        photographies de personnes sans leur accord. Les photos sont conservées <strong>30 jours</strong>
-        puis supprimées automatiquement.
+        photographies de personnes sans leur accord. Un repas posté reste visible <strong>48 heures</strong> dans le fil de vos amis et <strong>7 jours</strong> sur votre profil, puis disparaît :
+        sa photo, ses réactions et ses commentaires sont supprimés automatiquement (le repas reste dans votre journal privé). Les photos de repas non postés sont conservées 30 jours.
       </P>
       <UL items={[
         'Vous pouvez signaler un repas ou un commentaire, masquer un repas, bloquer un utilisateur ou supprimer vos publications à tout moment.',

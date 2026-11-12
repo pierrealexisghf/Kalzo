@@ -38,7 +38,7 @@ export default function Confidentialite() {
       <UL items={[
         'Âge, sexe, taille, poids, niveau d’activité, objectif, besoins calculés (calories, protéines, glucides, lipides)',
         'Repas enregistrés : nom, calories, macronutriments (dont sucres et fibres quand disponibles), note de 1 à 5 étoiles calculée sur votre appareil, type de repas, date',
-        <>Photos de vos repas : réduites sur votre appareil, stockées dans un espace privé, et <strong>supprimées automatiquement après 30 jours</strong> (le repas, ses valeurs et ses étoiles restent dans votre journal)</>,
+        <>Photos de vos repas : réduites sur votre appareil, stockées dans un espace privé, et <strong>supprimées automatiquement</strong> : 7 jours après la publication d’un repas posté, 30 jours après la date du repas sinon (le repas, ses valeurs et ses étoiles restent dans votre journal)</>,
         'Activités sportives : nom, durée, calories estimées',
         'Hydratation quotidienne et objectif d’eau',
         'Pesées et objectif de poids',
@@ -50,7 +50,7 @@ export default function Confidentialite() {
         ingrédients, préférences), la <strong>photo</strong> éventuelle et quelques éléments de votre
         profil (poids, objectif, besoins caloriques) sont transmis à Anthropic pour produire la
         réponse. Selon les conditions commerciales d'Anthropic, les données envoyées via son API ne servent pas à
-        entraîner ses modèles. La photo que vous choisissez d'attacher à un repas est conservée par Kalzo 30 jours (voir ci-dessous).
+        entraîner ses modèles. La photo que vous choisissez d'attacher à un repas est conservée par Kalzo 7 jours si le repas est posté, 30 jours sinon (voir ci-dessous).
         Seul le résultat que vous choisissez d'ajouter au journal est gardé.
       </P>
       <H3>2.4 Abonnement</H3>
@@ -109,8 +109,9 @@ export default function Confidentialite() {
         head={['Donnée', 'Durée']}
         rows={[
           ['Compte, profil et suivi', 'Tant que le compte existe ; effacés immédiatement à la suppression du compte'],
-          ['Photos des repas', '30 jours après la date du repas, puis suppression automatique (ou plus tôt si vous supprimez le repas ou le compte)'],
-          ['Amis, réactions, commentaires, signalements', 'Tant que le compte existe ; effacés avec le compte (les signalements peuvent être conservés le temps de leur traitement)'],
+          ['Repas postés (fil et profil)', 'Visibles 48 heures dans le fil de vos amis et 7 jours sur votre profil, puis ils disparaissent : la photo, les réactions et les commentaires sont supprimés (le repas, ses valeurs et ses étoiles restent dans votre journal privé)'],
+          ['Photos des repas', '7 jours après la publication pour un repas posté, 30 jours après la date du repas sinon, puis suppression automatique (ou plus tôt si vous supprimez le repas ou le compte)'],
+          ['Amis et signalements', 'Tant que le compte existe ; effacés avec le compte (les signalements peuvent être conservés le temps de leur traitement). Les réactions et commentaires sont supprimés 7 jours après la publication du repas concerné'],
           ['Jeton de notification', 'Tant que vous gardez les notifications activées ; effacé à la déconnexion ou avec le compte'],
           ['Données de facturation', '10 ans (obligation comptable), conservées chez Stripe'],
           ['Compteur d’usage de l’IA', 'Effacé avec le compte'],
